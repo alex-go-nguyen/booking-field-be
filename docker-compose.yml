@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:13.1
+    environment: 
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: demo2_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - .docker/data/db:/var/lib/postgresql/data
+    restart: unless-stopped
