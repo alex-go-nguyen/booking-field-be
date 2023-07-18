@@ -1,27 +1,37 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateUserInput } from './dto/create-user.input';
+import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import User from './user.entity';
+import User from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { BaseService } from 'src/common/services/base.service';
 
 @Injectable()
-export class UserService {
+export class UserService extends BaseService<User, CreateUserDto> {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(userRepository);
+  }
 
-  async findOne(username: string) {
+  async me(username: string) {
+    const user = await this.userRepository.findOne({ where: { username } });
+    user.password = undefined;
+
+    return user;
+  }
+
+  async findByUsername(username: string) {
     return this.userRepository.findOne({
       where: {
-        username: username,
+        username,
       },
     });
   }
 
-  async create(createUserInput: CreateUserInput) {
-    const existUser = await this.findOne(createUserInput.username);
+  async create(createUserInput: CreateUserDto) {
+    const existUser = await this.findByUsername(createUserInput.username);
 
     if (existUser) {
       throw new ConflictException('This username is already registered');
@@ -32,6 +42,8 @@ export class UserService {
     const user = this.userRepository.create(createUserInput);
 
     await this.userRepository.save(user);
+
+    user.password = undefined;
 
     return user;
   }
