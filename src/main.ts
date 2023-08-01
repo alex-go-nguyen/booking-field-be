@@ -1,10 +1,10 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import * as dotenv from 'dotenv';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import * as dotenv from 'dotenv';
+import { AppModule } from './app.module';
 
 dotenv.config();
 
@@ -26,8 +26,9 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.useGlobalPipes(new ValidationPipe({}));
-  app.use;
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  app.setGlobalPrefix('api');
 
   const port = configService.get('PORT');
   await app.listen(port);
