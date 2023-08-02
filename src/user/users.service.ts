@@ -1,6 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
 import { BaseService } from 'src/common/services/base.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -36,8 +35,6 @@ export class UserService extends BaseService<User, unknown> {
     if (existUser) {
       throw new ConflictException('This username is already registered');
     }
-
-    createUserInput.password = await bcrypt.hash(createUserInput.password, 10);
 
     const user = this.userRepository.create(createUserInput);
 

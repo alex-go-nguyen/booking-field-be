@@ -36,7 +36,7 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.find(options);
   }
 
-  findById(_id: string) {
+  findById(_id: number) {
     return this.repo.findOne({
       where: {
         _id,
@@ -54,7 +54,7 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.save(newData);
   }
 
-  async update(_id: string, data: DeepPartial<Entity>) {
+  async update(_id: number, data: DeepPartial<Dto>) {
     const existData = await this.findOne({
       where: {
         _id,
@@ -70,7 +70,7 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.save(updatedData);
   }
 
-  async softDelete(_id: string) {
+  async softDelete(_id: number) {
     const existData = await this.findOne({
       where: {
         _id,

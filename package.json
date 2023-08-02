@@ -92,7 +92,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-    "type": "module"
+    "type": "module",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   },
   "lint-staged": {
     "src/**/*.+(ts)": [

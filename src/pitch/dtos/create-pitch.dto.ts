@@ -1,18 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
 
-export class CreateBookingDto {
+export class CreatePitchDto {
   @ApiProperty()
-  startTime: Date;
-
-  @ApiProperty()
-  endTime: Date;
+  @IsNumber()
+  no: number;
 
   @ApiProperty()
   @IsNumber()
-  user: number;
+  pitchCategory: number;
 
   @ApiProperty()
   @IsNumber()
-  pitch: number;
+  price: number;
+
+  @ApiProperty()
+  @IsNumber()
+  venue: number;
 }

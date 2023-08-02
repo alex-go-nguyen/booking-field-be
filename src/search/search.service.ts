@@ -12,7 +12,7 @@ export class SearchService {
     });
   }
 
-  async search<T extends { id: string }>(index: string, query: string, fields: Array<Extract<keyof T, string>>) {
+  async search<T extends { id: number }>(index: string, query: string, fields: Array<Extract<keyof T, string>>) {
     const data = await this.elasticsearchService.search<T>({
       index,
       body: {

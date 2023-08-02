@@ -1,11 +1,11 @@
 export const RESPONSE_MESSAGE = 'response_message';
-export const ROLES_KEY = 'roles';
+export const ROLE_KEY = 'role';
 
 export const TABLE = {
   User: 'user',
-  Field: 'field',
-  SubField: 'sub-field',
+  Venue: 'venue',
+  Pitch: 'pitch',
   Booking: 'booking',
-  Category: 'category',
-  Evaluate: 'evaluate',
+  PitchCategory: 'pitch-category',
+  Rating: 'rating',
 };

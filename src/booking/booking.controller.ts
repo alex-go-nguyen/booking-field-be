@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
+import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from 'src/common/decorators/roles.decorator';
 import { ERole } from 'src/common/enums/role.enum';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dtos/create-booking.dto';
@@ -24,7 +24,7 @@ export class BookingController {
 
   @ResponseMessage('Get booking successfully')
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     const data = await this.bookingService.findOne({
       where: {
         _id: id,
@@ -37,6 +37,7 @@ export class BookingController {
   @ResponseMessage('Create booking successfully')
   @Post()
   async create(@Body() createBookingDto: CreateBookingDto) {
+    console.log(createBookingDto);
     const data = await this.bookingService.create(createBookingDto);
 
     return { data };
@@ -44,17 +45,17 @@ export class BookingController {
 
   @ResponseMessage('Update booking successfully')
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
+  async update(@Param('id') id: number, @Body() updateBookingDto: UpdateBookingDto) {
     const data = await this.bookingService.update(id, updateBookingDto);
 
     return { data };
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ERole.Admin)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role(ERole.Admin)
   @HttpCode(204)
   @Delete(':id')
-  delete(@Param('id') id: string) {
+  delete(@Param('id') id: number) {
     return this.bookingService.softDelete(id);
   }
 }

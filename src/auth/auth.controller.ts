@@ -1,10 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { plainToClass } from 'class-transformer';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { Roles } from 'src/common/decorators/roles.decorator';
 import { BaseResponse } from 'src/common/dtos/base.dto';
-import { ERole } from 'src/common/enums/role.enum';
 import { CreateUserDto } from 'src/user/dtos/create-user.dto';
 import User from 'src/user/entities/user.entity';
 import { AuthService } from './auth.service';
@@ -20,11 +17,13 @@ export class AuthController {
     description: 'Login successfully!',
     type: BaseResponse<AuthResponseData>,
   })
-  @Roles(ERole.Admin)
   @ResponseMessage('Login successfully')
   @Post('login')
   async signIn(@Body() signInDto: SignInPayload) {
-    const data = await this.authService.signIn(signInDto.username, signInDto.password);
+    console.log(signInDto);
+    const { username, password } = signInDto;
+
+    const data = await this.authService.signIn(username, password);
 
     return { data };
   }
@@ -36,9 +35,7 @@ export class AuthController {
   @ResponseMessage('Register successfully')
   @Post('register')
   async register(@Body() registerDto: CreateUserDto) {
-    const data = await this.authService.signUp(
-      plainToClass(CreateUserDto, registerDto, { excludeExtraneousValues: true }),
-    );
+    const data = await this.authService.signUp(registerDto);
 
     return { data };
   }

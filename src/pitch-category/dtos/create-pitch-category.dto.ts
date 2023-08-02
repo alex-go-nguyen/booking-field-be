@@ -1,12 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class SignInPayload {
+export class CreatePitchCategoryDto {
   @ApiProperty()
   @IsString()
-  username: string;
+  name: string;
 
   @ApiProperty()
   @IsString()
-  password: string;
+  description: string;
+
+  @ApiProperty()
+  @IsString()
+  thumbnail: string;
 }

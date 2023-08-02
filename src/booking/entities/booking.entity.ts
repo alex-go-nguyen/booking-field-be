@@ -1,8 +1,9 @@
 import { TABLE } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
-import { SubField } from 'src/sub-field/entities/sub-field.entity';
+import { Pitch } from 'src/pitch/entities/pitch.entity';
+import { Rating } from 'src/rating/entities/rating.entity';
 import User from 'src/user/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
 @Entity(TABLE.Booking)
 export class Booking extends Base {
@@ -12,11 +13,15 @@ export class Booking extends Base {
   @Column()
   endTime: Date;
 
-  @ManyToOne(() => SubField, (subField) => subField.bookings)
+  @ManyToOne(() => Pitch, (pitch) => pitch.bookings)
   @JoinColumn()
-  subField: number;
+  pitch: Pitch;
 
-  @ManyToOne(() => User, (user) => user.booking)
+  @ManyToOne(() => User, (user) => user.bookings)
   @JoinColumn()
-  user: number;
+  user: User;
+
+  @OneToOne(() => Rating)
+  @JoinColumn()
+  rating: Rating;
 }
