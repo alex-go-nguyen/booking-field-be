@@ -1,5 +1,5 @@
-import { TABLE } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
+import { TABLE } from 'src/common/enums/table.enum';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 

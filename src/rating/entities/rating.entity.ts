@@ -1,6 +1,6 @@
 import { Booking } from 'src/booking/entities/booking.entity';
-import { TABLE } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
+import { TABLE } from 'src/common/enums/table.enum';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity(TABLE.Rating)
