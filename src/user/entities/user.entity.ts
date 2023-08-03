@@ -1,16 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
+import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
+import { Booking } from 'src/booking/entities/booking.entity';
+import { TABLE } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
-import { Role } from 'src/common/enums/role.enum';
-import { Column, Entity } from 'typeorm';
+import { ERole } from 'src/common/enums/role.enum';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 
-@Entity()
+@Entity(TABLE.User)
 export default class User extends Base {
-  @ApiProperty()
   @Column()
   username: string;
 
-  @ApiProperty()
   @IsEmail()
   @Column()
   email: string;
@@ -24,15 +24,22 @@ export default class User extends Base {
   @Column()
   password: string;
 
-  @ApiProperty()
   @Column()
   phone: string;
 
   @Column({
     type: 'enum',
-    enum: Role,
-    array: true,
-    default: [Role.User],
+    enum: ERole,
+    default: ERole.User,
   })
-  roles: Role[];
+  role: ERole;
+
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
 }

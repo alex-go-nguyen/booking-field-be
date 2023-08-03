@@ -1,8 +1,8 @@
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/users.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { CreateUserDto } from 'src/user/dtos/create-user.dto';
+import { UserService } from 'src/user/users.service';
 
 @Injectable()
 export class AuthService {
@@ -28,12 +28,8 @@ export class AuthService {
     user.password = undefined;
 
     return {
-      status: HttpStatus.OK,
-      message: 'Login successfully',
-      data: {
-        accessToken,
-        user,
-      },
+      accessToken,
+      user,
     };
   }
 
@@ -47,12 +43,8 @@ export class AuthService {
     user.password = undefined;
 
     return {
-      status: HttpStatus.CREATED,
-      message: 'Register account successfully',
-      data: {
-        accessToken,
-        user,
-      },
+      accessToken,
+      user,
     };
   }
 }
