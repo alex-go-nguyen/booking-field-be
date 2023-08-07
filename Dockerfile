@@ -1,5 +1,5 @@
 FROM node:18-alpine
-WORKDIR /booking-field
+WORKDIR /booking-pitch
 COPY . .
 RUN npm install
 # Development

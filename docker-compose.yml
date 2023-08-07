@@ -1,14 +1,47 @@
-version: "3.8"
+version: '3.8'
 
 services:
   db:
     image: postgres:13.1
-    environment: 
+    environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: demo2_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - .docker/data/db:/var/lib/postgresql/data
     restart: unless-stopped
+
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.3
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - node.name=elasticsearch
+      - http.port=9200
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=elasticsearch
+      - cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - .docker/data/es:/usr/share/elasticsearch/data
+    ports:
+      - '${ELASTIC_SEARCH_PORT}:${ELASTIC_SEARCH_PORT}'
+  kibana:
+    container_name: kb-container
+    image: docker.elastic.co/kibana/kibana:8.2.3
+    restart: always
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - es
+    ports:
+      - 5601:5601
