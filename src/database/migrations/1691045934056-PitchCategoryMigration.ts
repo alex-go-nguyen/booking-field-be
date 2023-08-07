@@ -38,7 +38,7 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
           {
             name: 'deletedAt',
             type: 'timestamp',
-            default: 'now()',
+            isNullable: true,
           },
         ],
       }),

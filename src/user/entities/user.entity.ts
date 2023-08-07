@@ -27,6 +27,9 @@ export default class User extends Base {
   @Column()
   phone: string;
 
+  @Column()
+  stripeCustomerId: string;
+
   @Column({
     type: 'enum',
     enum: ERole,

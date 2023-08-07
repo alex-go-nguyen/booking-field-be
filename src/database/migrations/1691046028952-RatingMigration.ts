@@ -34,7 +34,7 @@ export class RatingMigration1691046028952 implements MigrationInterface {
           {
             name: 'deletedAt',
             type: 'timestamp',
-            default: 'now()',
+            isNullable: true,
           },
         ],
       }),
@@ -54,22 +54,6 @@ export class RatingMigration1691046028952 implements MigrationInterface {
         columnNames: ['booking_id'],
         referencedColumnNames: ['_id'],
         referencedTableName: TABLE.Booking,
-      }),
-    );
-
-    await queryRunner.addColumn(
-      TABLE.Booking,
-      new TableColumn({
-        name: 'rating_id',
-        type: 'int',
-      }),
-    );
-    await queryRunner.createForeignKey(
-      TABLE.Booking,
-      new TableForeignKey({
-        columnNames: ['rating_id'],
-        referencedColumnNames: ['_id'],
-        referencedTableName: TABLE.Rating,
       }),
     );
   }

@@ -81,8 +81,6 @@ export class VenueController {
       'province',
     ]);
 
-    console.log(ids);
-
     return this.venueService.searchListVenues(query, ids);
   }
 

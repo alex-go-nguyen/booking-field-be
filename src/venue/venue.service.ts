@@ -44,8 +44,6 @@ export class VenueService extends BaseService<Venue, CreateVenueDto> {
       .where('fp._id notnull')
       .orderBy('fp.price', order || OrderEnum.Asc);
 
-    console.log(subQuery);
-
     const dataQb = mainQuery.getRawMany();
     const countQb = mainQuery.getCount();
 

@@ -20,7 +20,6 @@ export class AuthController {
   @ResponseMessage('Login successfully')
   @Post('login')
   async signIn(@Body() signInDto: SignInPayload) {
-    console.log(signInDto);
     const { username, password } = signInDto;
 
     const data = await this.authService.signIn(username, password);

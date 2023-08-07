@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
@@ -17,7 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
             autoLoadEntities: true,
             synchronize: false,
             logging: true,
-            migrationsRun: true,
+            migrationsRun: false,
             migrations: ['dist/src/database/migrations/**/*{.ts,.js}'],
           };
         }
@@ -31,7 +31,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           autoLoadEntities: true,
           synchronize: false,
           logging: true,
-          migrationsRun: true,
+          migrationsRun: false,
           migrations: ['dist/src/database/migrations/**/*{.ts,.js}'],
         };
       },

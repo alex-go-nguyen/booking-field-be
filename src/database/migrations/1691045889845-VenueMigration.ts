@@ -40,6 +40,7 @@ export class VenueMigration1691045889845 implements MigrationInterface {
           {
             name: 'imageList',
             type: 'json',
+            isNullable: true,
           },
           {
             name: 'openAt',
@@ -66,7 +67,7 @@ export class VenueMigration1691045889845 implements MigrationInterface {
           {
             name: 'deletedAt',
             type: 'timestamp',
-            default: 'now()',
+            isNullable: true,
           },
         ],
       }),
