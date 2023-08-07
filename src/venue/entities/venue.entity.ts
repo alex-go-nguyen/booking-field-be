@@ -1,5 +1,5 @@
-import { TABLE } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
+import { TABLE } from 'src/common/enums/table.enum';
 import { strToSlug } from 'src/common/utils';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
@@ -35,7 +35,7 @@ export class Venue extends Base {
   @Column({ type: 'time' })
   closeAt: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text' })
   slug: string;
 
   @OneToMany(() => Pitch, (pitch) => pitch.venue)
