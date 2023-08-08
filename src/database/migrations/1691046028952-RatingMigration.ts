@@ -1,11 +1,11 @@
-import { TABLE } from 'src/common/enums/table.enum';
+import { TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
 
 export class RatingMigration1691046028952 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: TABLE.Rating,
+        name: TABLES.rating,
         columns: [
           {
             name: '_id',
@@ -19,7 +19,7 @@ export class RatingMigration1691046028952 implements MigrationInterface {
           },
           {
             name: 'rate',
-            type: 'boolean',
+            type: 'float',
           },
           {
             name: 'createdAt',
@@ -42,26 +42,26 @@ export class RatingMigration1691046028952 implements MigrationInterface {
     );
 
     await queryRunner.addColumn(
-      TABLE.Rating,
+      TABLES.rating,
       new TableColumn({
         name: 'booking_id',
         type: 'int',
       }),
     );
     await queryRunner.createForeignKey(
-      TABLE.Rating,
+      TABLES.rating,
       new TableForeignKey({
         columnNames: ['booking_id'],
         referencedColumnNames: ['_id'],
-        referencedTableName: TABLE.Booking,
+        referencedTableName: TABLES.booking,
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    const table = await queryRunner.getTable(TABLE.Rating);
+    const table = await queryRunner.getTable(TABLES.rating);
     const bookingForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('booking_id') !== -1);
 
-    queryRunner.dropForeignKey(TABLE.Rating, bookingForeignKey);
+    queryRunner.dropForeignKey(TABLES.rating, bookingForeignKey);
   }
 }

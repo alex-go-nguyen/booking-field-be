@@ -1,14 +1,14 @@
 import { Booking } from 'src/booking/entities/booking.entity';
+import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
-import { TABLE } from 'src/common/enums/table.enum';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
-@Entity(TABLE.Rating)
+@Entity(TABLES.rating)
 export class Rating extends Base {
   @Column()
   content: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 1, default: 0 })
+  @Column()
   rate: number;
 
   @OneToOne(() => Booking, (booking) => booking.rating)

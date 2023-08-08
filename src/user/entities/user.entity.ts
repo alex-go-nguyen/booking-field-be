@@ -1,12 +1,12 @@
 import * as bcrypt from 'bcrypt';
 import { IsEmail } from 'class-validator';
 import { Booking } from 'src/booking/entities/booking.entity';
+import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { ERole } from 'src/common/enums/role.enum';
-import { TABLE } from 'src/common/enums/table.enum';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 
-@Entity(TABLE.User)
+@Entity(TABLES.user)
 export default class User extends Base {
   @Column()
   username: string;

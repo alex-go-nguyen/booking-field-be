@@ -1,18 +1,12 @@
-import { TABLE } from 'src/common/enums/table.enum';
+import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class VenueMigration1691045889845 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: TABLE.Venue,
+        name: TABLES.venue,
         columns: [
-          {
-            name: '_id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-          },
           {
             name: 'name',
             type: 'varchar',
@@ -54,49 +48,35 @@ export class VenueMigration1691045889845 implements MigrationInterface {
             name: 'slug',
             type: 'varchar',
           },
-          {
-            name: 'createdAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'updatedAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deletedAt',
-            type: 'timestamp',
-            isNullable: true,
-          },
+          ...BASE_COLUMNS,
         ],
       }),
       true,
     );
 
     await queryRunner.createIndex(
-      TABLE.Venue,
+      TABLES.venue,
       new TableIndex({
         name: 'venueName-idx',
         columnNames: ['name'],
       }),
     );
     await queryRunner.createIndex(
-      TABLE.Venue,
+      TABLES.venue,
       new TableIndex({
         name: 'address-idx',
         columnNames: ['address'],
       }),
     );
     await queryRunner.createIndex(
-      TABLE.Venue,
+      TABLES.venue,
       new TableIndex({
         name: 'province-idx',
         columnNames: ['province'],
       }),
     );
     await queryRunner.createIndex(
-      TABLE.Venue,
+      TABLES.venue,
       new TableIndex({
         name: 'district-idx',
         columnNames: ['district'],
@@ -105,10 +85,10 @@ export class VenueMigration1691045889845 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(TABLE.Venue, 'name-idx');
-    await queryRunner.dropIndex(TABLE.Venue, 'address-idx');
-    await queryRunner.dropIndex(TABLE.Venue, 'province-idx');
-    await queryRunner.dropIndex(TABLE.Venue, 'district-idx');
-    await queryRunner.dropTable(TABLE.Venue);
+    await queryRunner.dropIndex(TABLES.venue, 'name-idx');
+    await queryRunner.dropIndex(TABLES.venue, 'address-idx');
+    await queryRunner.dropIndex(TABLES.venue, 'province-idx');
+    await queryRunner.dropIndex(TABLES.venue, 'district-idx');
+    await queryRunner.dropTable(TABLES.venue);
   }
 }

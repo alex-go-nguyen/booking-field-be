@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
@@ -7,6 +7,7 @@ import { Role } from 'src/common/decorators/roles.decorator';
 import { ERole } from 'src/common/enums/role.enum';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dtos/create-booking.dto';
+import { FindBookingFreeTimeDto } from './dtos/find-freetime.dto';
 import { UpdateBookingDto } from './dtos/update-booking.dto';
 
 @ApiTags('Booking')
@@ -18,6 +19,14 @@ export class BookingController {
   @Get()
   async findAll() {
     const data = await this.bookingService.findAll();
+
+    return { data };
+  }
+
+  @ResponseMessage('Get booking freetime successfully')
+  @Get('pitch')
+  async findBookingOfPitchByDay(@Query() query: FindBookingFreeTimeDto) {
+    const data = await this.bookingService.findBookingOfPitchByDay(query);
 
     return { data };
   }

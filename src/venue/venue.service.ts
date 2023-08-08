@@ -19,30 +19,30 @@ export class VenueService extends BaseService<Venue, CreateVenueDto> {
     const skip = (page - 1) * take;
 
     const subQuery = this.venueRepository
-      .createQueryBuilder('f')
-      .select('f._id', '_id')
+      .createQueryBuilder('v')
+      .select('v._id', '_id')
       .addSelect('p.price', 'price')
       .addSelect('p.pitchCategory_id', 'pitchCategory_id')
-      .leftJoin('pitch', 'p', 'f._id = p.venue_id')
+      .leftJoin('pitch', 'p', 'v._id = p.venue_id')
       .where('p.price > :minPrice')
       .andWhere('p.price < :maxPrice')
       .andWhere('p.pitchCategory_id = :pitchCategory_id')
-      .andWhere('f._id IN (:...ids)')
+      .andWhere('v._id IN (:...ids)')
       .take(take)
       .skip(skip)
-      .groupBy('f._id')
+      .groupBy('v._id')
       .addGroupBy('p.price')
       .addGroupBy('p.pitchCategory_id')
       .getQuery();
 
     const mainQuery = this.venueRepository
-      .createQueryBuilder('f')
-      .select('f.*')
-      .addSelect('fp.*')
-      .leftJoin(`(${subQuery})`, 'fp', 'f._id = fp._id')
+      .createQueryBuilder('v')
+      .select('v.*')
+      .addSelect('vp.*')
+      .leftJoin(`(${subQuery})`, 'vp', 'v._id = vp._id')
       .setParameters({ maxPrice, minPrice, pitchCategory_id: pitchCategory, ids: venueIds })
-      .where('fp._id notnull')
-      .orderBy('fp.price', order || OrderEnum.Asc);
+      .where('vp._id notnull')
+      .orderBy('vp.price', order || OrderEnum.Asc);
 
     const dataQb = mainQuery.getRawMany();
     const countQb = mainQuery.getCount();

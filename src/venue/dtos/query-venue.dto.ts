@@ -1,26 +1,26 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumberString, IsOptional } from 'class-validator';
 import { IQuery } from 'src/common/dtos/query.dto';
 
 export class IVenueQuery extends IQuery {
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
   location: string;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
   pitch_type: string;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
   sort: number;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsNumberString()
   maxPrice: number;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsNumberString()
   minPrice: number;

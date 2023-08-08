@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
 
 export class CreateRatingDto {
@@ -10,7 +11,10 @@ export class CreateRatingDto {
   @ApiProperty()
   content: string;
 
+  @ApiProperty({
+    type: Number,
+  })
   @IsNumber()
-  @ApiProperty()
+  @Type(() => Number)
   rate: number;
 }

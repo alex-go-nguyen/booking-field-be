@@ -5,6 +5,7 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { IPagination } from 'src/common/dtos/pagination.dto';
 import { OrderEnum } from 'src/common/enums/order.enum';
 import { CreatePitchDto } from './dtos/create-pitch.dto';
+import { FindPitchQueryDto } from './dtos/find-pitch.dto';
 import { UpdatePitchDto } from './dtos/update-pitch.dto';
 import { PitchService } from './pitch.service';
 
@@ -25,9 +26,32 @@ export class PitchController {
     });
   }
 
+  @ResponseMessage('Get pitch by venue detail page successfully')
+  @Get('venue-detail/:venueId')
+  async findInVenueDetail(@Param('venueId') venueId: number) {
+    const data = await this.pitchService.findInVenueDetail(venueId);
+
+    return { data };
+  }
+
+  @ResponseMessage('Get pitch by venue successfully')
   @Get('venue/:venueId')
-  async findInVenue(@Param('venueId') venueId: string) {
-    const data = await this.pitchService.findInVenue(venueId);
+  async findByVenue(@Param('venueId') venueId: number, @Query() query: FindPitchQueryDto) {
+    const relations = ['venue', 'pitchCategory'];
+
+    const { pitchCategoryId } = query;
+
+    const data = await this.pitchService.findAll({
+      where: {
+        venue: {
+          _id: venueId,
+        },
+        pitchCategory: {
+          _id: pitchCategoryId,
+        },
+      },
+      relations,
+    });
 
     return { data };
   }
