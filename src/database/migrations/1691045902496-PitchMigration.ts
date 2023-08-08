@@ -34,7 +34,7 @@ export class PitchMigration1691045902496 implements MigrationInterface {
           {
             name: 'deletedAt',
             type: 'timestamp',
-            default: 'now()',
+            isNullable: true,
           },
         ],
       }),

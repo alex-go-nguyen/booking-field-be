@@ -1,6 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ERole } from 'src/common/enums/role.enum';
 import { BaseService } from 'src/common/services/base.service';
+import { StripeService } from 'src/stripe/stripe.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import User from './entities/user.entity';
@@ -10,6 +12,7 @@ export class UserService extends BaseService<User, unknown> {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private stripeService: StripeService,
   ) {
     super(userRepository);
   }
@@ -36,7 +39,13 @@ export class UserService extends BaseService<User, unknown> {
       throw new ConflictException('This username is already registered');
     }
 
-    const user = this.userRepository.create(createUserInput);
+    const stripeCustomer = await this.stripeService.createCustomer(createUserInput.username, createUserInput.email);
+
+    const user = this.userRepository.create({
+      ...createUserInput,
+      role: ERole.User,
+      stripeCustomerId: stripeCustomer.id,
+    });
 
     await this.userRepository.save(user);
 

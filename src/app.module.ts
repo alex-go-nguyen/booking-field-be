@@ -10,6 +10,8 @@ import { PitchModule } from './pitch/pitch.module';
 import { PitchCategoryModule } from './pitch-category/pitch-category.module';
 import { RatingModule } from './rating/rating.module';
 import { SearchModule } from './search/search.module';
+import { StripeModule } from './stripe/stripe.module';
+import { StripeService } from './stripe/stripe.service';
 import { UserModule } from './user/users.module';
 import { VenueModule } from './venue/venue.module';
 
@@ -28,12 +30,14 @@ import { VenueModule } from './venue/venue.module';
     CloudinaryModule,
     RatingModule,
     DatabaseModule,
+    StripeModule,
   ],
   providers: [
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
     },
+    StripeService,
   ],
 })
 export class AppModule {}

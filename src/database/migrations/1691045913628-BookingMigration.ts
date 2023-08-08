@@ -34,7 +34,7 @@ export class BookingMigration1691045913628 implements MigrationInterface {
           {
             name: 'deletedAt',
             type: 'timestamp',
-            default: 'now()',
+            isNullable: true,
           },
         ],
       }),
@@ -48,10 +48,6 @@ export class BookingMigration1691045913628 implements MigrationInterface {
       }),
       new TableColumn({
         name: 'user_id',
-        type: 'int',
-      }),
-      new TableColumn({
-        name: 'booking_id',
         type: 'int',
       }),
     ]);
@@ -71,23 +67,6 @@ export class BookingMigration1691045913628 implements MigrationInterface {
         columnNames: ['user_id'],
         referencedColumnNames: ['_id'],
         referencedTableName: TABLE.User,
-      }),
-    );
-
-    await queryRunner.addColumn(
-      TABLE.Pitch,
-      new TableColumn({
-        name: 'booking_id',
-        type: 'int',
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      TABLE.Pitch,
-      new TableForeignKey({
-        columnNames: ['booking_id'],
-        referencedColumnNames: ['_id'],
-        referencedTableName: TABLE.Booking,
       }),
     );
   }

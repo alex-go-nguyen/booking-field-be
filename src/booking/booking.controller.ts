@@ -37,7 +37,6 @@ export class BookingController {
   @ResponseMessage('Create booking successfully')
   @Post()
   async create(@Body() createBookingDto: CreateBookingDto) {
-    console.log(createBookingDto);
     const data = await this.bookingService.create(createBookingDto);
 
     return { data };
