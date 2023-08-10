@@ -1,31 +1,65 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { IPagination } from 'src/common/dtos/pagination.dto';
-import { OrderEnum } from 'src/common/enums/order.enum';
+import { SearchService } from 'src/search/search.service';
+import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
+import { Between, In } from 'typeorm';
 import { CreatePitchDto } from './dtos/create-pitch.dto';
 import { FindPitchQueryDto } from './dtos/find-pitch.dto';
+import { IPitchQuery } from './dtos/pitch-query.dto';
 import { UpdatePitchDto } from './dtos/update-pitch.dto';
+import { Pitch } from './entities/pitch.entity';
 import { PitchService } from './pitch.service';
 
 @ApiTags('Pitch')
 @Controller('pitches')
 export class PitchController {
-  constructor(private readonly pitchService: PitchService) {}
+  constructor(private readonly pitchService: PitchService, private readonly searchService: SearchService) {}
 
+  @ApiOkResponse({
+    description: 'Get all pitches successfully!',
+    type: [Pitch],
+  })
   @ResponseMessage('Get all pitches successfully')
   @Get()
-  async findAll(@Query() query: IPagination) {
-    const relations = ['venue', 'pitchCategory'];
-    const order = query.order || OrderEnum.Asc;
+  async findAll(@Query() query: IPitchQuery) {
+    const { page, limit, pitchCategoryId, minPrice, maxPrice, location, sorts } = query;
 
-    return this.pitchService.findAndCount(query, {
-      order: { no: order },
-      relations,
-    });
+    let ids: number[] = [];
+    if (location) {
+      ids = await this.searchService.search<VenueSearchBody>('venues', location, [
+        'name',
+        'description',
+        'district',
+        'province',
+      ]);
+    }
+
+    return this.pitchService.findMany(
+      { page, limit, sorts },
+      {
+        where: {
+          price: minPrice && maxPrice && Between(minPrice, maxPrice),
+          pitchCategory: {
+            _id: pitchCategoryId && pitchCategoryId,
+          },
+          venue: {
+            _id: location && In(ids),
+          },
+        },
+        relations: {
+          pitchCategory: true,
+          venue: true,
+        },
+      },
+    );
   }
 
+  @ApiOkResponse({
+    description: 'Get all pitch by venue detail page successfully!',
+    type: [Pitch],
+  })
   @ResponseMessage('Get pitch by venue detail page successfully')
   @Get('venue-detail/:venueId')
   async findInVenueDetail(@Param('venueId') venueId: number) {
@@ -34,7 +68,11 @@ export class PitchController {
     return { data };
   }
 
-  @ResponseMessage('Get pitch by venue successfully')
+  @ApiOkResponse({
+    description: 'Get pitches by venue successfully!',
+    type: [Pitch],
+  })
+  @ResponseMessage('Get pitches by venue successfully')
   @Get('venue/:venueId')
   async findByVenue(@Param('venueId') venueId: number, @Query() query: FindPitchQueryDto) {
     const relations = ['venue', 'pitchCategory'];
@@ -56,6 +94,10 @@ export class PitchController {
     return { data };
   }
 
+  @ApiOkResponse({
+    description: 'Get pitch successfully!',
+    type: Pitch,
+  })
   @ResponseMessage('Get pitch successfully')
   @Get(':id')
   async findOne(@Param('id') id: number) {
@@ -68,6 +110,10 @@ export class PitchController {
     return { data };
   }
 
+  @ApiOkResponse({
+    description: 'Create pitch successfully!',
+    type: Pitch,
+  })
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create pitch successfully')
   @Post()
@@ -75,6 +121,10 @@ export class PitchController {
     return this.pitchService.create(createPitchDto);
   }
 
+  @ApiOkResponse({
+    description: 'Update pitch successfully!',
+    type: Pitch,
+  })
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Update pitch successfully')
   @Put(':id')
@@ -84,6 +134,9 @@ export class PitchController {
     return { data };
   }
 
+  @ApiOkResponse({
+    description: 'Delete pitch successfully!',
+  })
   @UseGuards(JwtAuthGuard)
   @HttpCode(204)
   @Delete(':id')

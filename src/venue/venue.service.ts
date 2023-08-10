@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderEnum } from 'src/common/enums/order.enum';
 import { BaseService } from 'src/common/services/base.service';
 import { Repository } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
@@ -14,38 +13,43 @@ export class VenueService extends BaseService<Venue, CreateVenueDto> {
   }
 
   async searchListVenues(query?: ISearchListVenueQuery, venueIds?: Array<number>) {
-    const { limit, page, order, maxPrice, minPrice, pitchCategory: pitchCategory } = query;
+    const { limit, page, sorts, maxPrice, minPrice, pitchCategory: pitchCategory } = query;
     const take = limit || 0;
     const skip = (page - 1) * take;
 
-    const subQuery = this.venueRepository
+    const subQb = this.venueRepository
       .createQueryBuilder('v')
       .select('v._id', '_id')
-      .addSelect('p.price', 'price')
-      .addSelect('p.pitchCategory_id', 'pitchCategory_id')
       .leftJoin('pitch', 'p', 'v._id = p.venue_id')
       .where('p.price > :minPrice')
       .andWhere('p.price < :maxPrice')
       .andWhere('p.pitchCategory_id = :pitchCategory_id')
       .andWhere('v._id IN (:...ids)')
-      .take(take)
-      .skip(skip)
       .groupBy('v._id')
       .addGroupBy('p.price')
       .addGroupBy('p.pitchCategory_id')
       .getQuery();
 
-    const mainQuery = this.venueRepository
+    const mainQb = this.venueRepository
       .createQueryBuilder('v')
       .select('v.*')
       .addSelect('vp.*')
-      .leftJoin(`(${subQuery})`, 'vp', 'v._id = vp._id')
+      .leftJoin(`(${subQb})`, 'vp', 'v._id = vp._id')
       .setParameters({ maxPrice, minPrice, pitchCategory_id: pitchCategory, ids: venueIds })
-      .where('vp._id notnull')
-      .orderBy('vp.price', order || OrderEnum.Asc);
+      .where('vp._id notnull');
+    if (sorts) {
+      sorts.map((sort) => {
+        const field = Object.keys(sort);
+        const order = sort[`${field}`];
 
-    const dataQb = mainQuery.getRawMany();
-    const countQb = mainQuery.getCount();
+        console.log(field, order);
+        mainQb.addOrderBy(`b.${field[0]}`, order);
+      });
+    }
+    mainQb.take(take).skip(skip);
+
+    const dataQb = mainQb.getRawMany();
+    const countQb = mainQb.getCount();
 
     const [data, total] = await Promise.all([dataQb, countQb]);
 
