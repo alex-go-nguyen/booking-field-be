@@ -33,7 +33,7 @@ export class RatingController {
   @ResponseMessage('Get ratings successfully')
   @Get()
   async findAll() {
-    const data = await this.ratingService.findAndCount();
+    const data = await this.ratingService.findMany();
 
     return { data };
   }

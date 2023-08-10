@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
@@ -9,6 +10,7 @@ import { CreatePitchCategoryDto } from './dtos/create-pitch-category.dto';
 import { UpdatePitchCategoryDto } from './dtos/update-pitch-category.dto';
 import { PitchCategoryService } from './pitch-category.service';
 
+@ApiTags('Pitch Category')
 @Controller('pitch-categories')
 export class PitchCategoryController {
   constructor(private readonly pitchCategoryService: PitchCategoryService) {}

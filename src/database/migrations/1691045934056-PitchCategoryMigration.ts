@@ -1,11 +1,11 @@
-import { TABLE } from 'src/common/enums/table.enum';
+import { TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
 export class PitchCategoryMigration1691045934056 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: TABLE.PitchCategory,
+        name: TABLES.pitchCategory,
         columns: [
           {
             name: '_id',
@@ -46,7 +46,7 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
     );
 
     await queryRunner.createIndex(
-      TABLE.PitchCategory,
+      TABLES.pitchCategory,
       new TableIndex({
         name: 'pitchName-idx',
         columnNames: ['name'],
@@ -54,7 +54,7 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
     );
 
     await queryRunner.addColumn(
-      TABLE.Pitch,
+      TABLES.pitch,
       new TableColumn({
         name: 'pitchCategory_id',
         type: 'int',
@@ -62,17 +62,17 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      TABLE.Pitch,
+      TABLES.pitch,
       new TableForeignKey({
         columnNames: ['pitchCategory_id'],
         referencedColumnNames: ['_id'],
-        referencedTableName: TABLE.PitchCategory,
+        referencedTableName: TABLES.pitchCategory,
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(TABLE.PitchCategory, 'name-idx');
-    await queryRunner.dropTable(TABLE.PitchCategory);
+    await queryRunner.dropIndex(TABLES.pitchCategory, 'name-idx');
+    await queryRunner.dropTable(TABLES.pitchCategory);
   }
 }

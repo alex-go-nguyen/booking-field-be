@@ -1,18 +1,12 @@
-import { TABLE } from 'src/common/enums/table.enum';
+import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class UserMigration1691039348322 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: TABLE.User,
+        name: TABLES.user,
         columns: [
-          {
-            name: '_id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-          },
           {
             name: 'username',
             type: 'varchar',
@@ -43,28 +37,14 @@ export class UserMigration1691039348322 implements MigrationInterface {
             name: 'role',
             type: 'varchar',
           },
-          {
-            name: 'createdAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'updatedAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deletedAt',
-            type: 'timestamp',
-            isNullable: true,
-          },
+          ...BASE_COLUMNS,
         ],
       }),
       true,
     );
 
     await queryRunner.createIndex(
-      TABLE.User,
+      TABLES.user,
       new TableIndex({
         name: 'username-idx',
         columnNames: ['username'],
@@ -73,7 +53,7 @@ export class UserMigration1691039348322 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(TABLE.User, 'username-idx');
-    await queryRunner.dropTable(TABLE.User);
+    await queryRunner.dropIndex(TABLES.user, 'username-idx');
+    await queryRunner.dropTable(TABLES.user);
   }
 }

@@ -1,23 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsOptional } from 'class-validator';
 import { IBaseQuery } from 'src/common/dtos/query.dto';
 
-export class ISearchListVenueQuery extends IBaseQuery {
+export class IPitchQuery extends IBaseQuery {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  pitchCategory: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  location: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  pitch_type: string;
+  pitchCategoryId: number;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -26,4 +17,8 @@ export class ISearchListVenueQuery extends IBaseQuery {
   @ApiPropertyOptional()
   @IsOptional()
   minPrice: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  location: string;
 }
