@@ -33,7 +33,7 @@ export class BookingService extends BaseService<Booking, unknown> {
         const field = Object.keys(sort);
         const order = sort[`${field}`];
 
-        console.log(field, order);
+        console.log(field[0], order);
         qb.addOrderBy(`b.${field[0]}`, order);
       });
     }

@@ -16,6 +16,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { IPagination } from 'src/common/dtos/pagination.dto';
+import { IBaseQuery } from 'src/common/dtos/query.dto';
 import { CreateRatingDto } from './dtos/create-rating.dto';
 import { UpdateRatingDto } from './dtos/update-rating.dto';
 import { Rating } from './entities/rating.entity';
@@ -32,8 +33,8 @@ export class RatingController {
   })
   @ResponseMessage('Get ratings successfully')
   @Get()
-  async findAll() {
-    const data = await this.ratingService.findMany();
+  async findAll(@Query() query: IBaseQuery) {
+    const data = await this.ratingService.findMany(query);
 
     return { data };
   }
