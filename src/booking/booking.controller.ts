@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Role } from 'src/common/decorators/roles.decorator';
 import { ERole } from 'src/common/enums/role.enum';
+import User from 'src/user/entities/user.entity';
 import { BookingService } from './booking.service';
 import { IBookingQuery } from './dtos/booking-query.dto';
 import { CreateBookingDto } from './dtos/create-booking.dto';
@@ -34,9 +35,12 @@ export class BookingController {
   }
 
   @ResponseMessage('Create booking successfully')
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createBookingDto: CreateBookingDto) {
-    const data = await this.bookingService.create(createBookingDto);
+  async create(@Body() createBookingDto: CreateBookingDto, @Req() req) {
+    const user: User = req['user'];
+
+    const data = await this.bookingService.create({ ...createBookingDto, user: user._id });
 
     return { data };
   }
