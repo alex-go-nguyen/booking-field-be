@@ -1,11 +1,36 @@
 export const RESPONSE_MESSAGE = 'response_message';
+
 export const ROLE_KEY = 'role';
 
-export const TABLE = {
-  User: 'user',
-  Venue: 'venue',
-  Pitch: 'pitch',
-  Booking: 'booking',
-  PitchCategory: 'pitch-category',
-  Rating: 'rating',
+export const BASE_COLUMNS = [
+  {
+    name: '_id',
+    type: 'int',
+    isPrimary: true,
+    isGenerated: true,
+  },
+  {
+    name: 'createdAt',
+    type: 'timestamp',
+    default: 'now()',
+  },
+  {
+    name: 'updatedAt',
+    type: 'timestamp',
+    default: 'now()',
+  },
+  {
+    name: 'deletedAt',
+    type: 'timestamp',
+    isNullable: true,
+  },
+];
+
+export const TABLES = {
+  user: 'user',
+  venue: 'venue',
+  pitch: 'pitch',
+  booking: 'booking',
+  pitchCategory: 'pitch-category',
+  rating: 'rating',
 };

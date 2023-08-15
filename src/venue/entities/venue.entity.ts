@@ -1,4 +1,4 @@
-import { TABLE } from 'src/common/constants';
+import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { strToSlug } from 'src/common/utils';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
@@ -6,7 +6,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { ILocation } from '../interfaces/location.interface';
 import { VenueImage } from '../interfaces/venue-image.interface';
 
-@Entity(TABLE.Venue)
+@Entity(TABLES.venue)
 export class Venue extends Base {
   @Column()
   name: string;
@@ -35,7 +35,7 @@ export class Venue extends Base {
   @Column({ type: 'time' })
   closeAt: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text' })
   slug: string;
 
   @OneToMany(() => Pitch, (pitch) => pitch.venue)

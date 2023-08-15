@@ -1,19 +1,26 @@
 import { NotFoundException } from '@nestjs/common';
 import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
-import { IPagination } from '../dtos/pagination.dto';
+import { IBaseQuery } from '../dtos/query.dto';
 import { Base } from '../entities/base.entity';
 
 export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
   constructor(protected repo: Repository<Entity>) {}
 
-  async findAndCount(query?: IPagination, options?: FindManyOptions<Entity>) {
-    const take = query?.limit || 0;
-    const page = query?.page || 1;
+  async findMany(query: IBaseQuery, options?: FindManyOptions<Entity>) {
+    const { limit, page, sorts } = query;
+
+    const take = limit || 0;
     const skip = (page - 1) * take;
+    const order = {};
+
+    sorts?.map((sort) => {
+      order[sort.field] = sort.order;
+    });
 
     const [data, total] = await this.repo.findAndCount({
       take,
       skip,
+      order,
       ...options,
     });
 

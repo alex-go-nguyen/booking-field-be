@@ -35,13 +35,3 @@ services:
       - .docker/data/es:/usr/share/elasticsearch/data
     ports:
       - '${ELASTIC_SEARCH_PORT}:${ELASTIC_SEARCH_PORT}'
-  kibana:
-    container_name: kb-container
-    image: docker.elastic.co/kibana/kibana:8.2.3
-    restart: always
-    environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-    depends_on:
-      - es
-    ports:
-      - 5601:5601

@@ -1,11 +1,11 @@
 import { Booking } from 'src/booking/entities/booking.entity';
-import { TABLE } from 'src/common/constants';
+import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { PitchCategory } from 'src/pitch-category/entities/pitch-category.entity';
 import { Venue } from 'src/venue/entities/venue.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
-@Entity(TABLE.Pitch)
+@Entity(TABLES.pitch)
 export class Pitch extends Base {
   @Column()
   no: number;

@@ -12,16 +12,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
-import { OrderEnum } from 'src/common/enums/order.enum';
 import { SearchService } from 'src/search/search.service';
 import { In } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { IVenueQuery } from './dtos/query-venue.dto';
-import { ISearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
 import { VenueSearchBody } from './interfaces/venue-search.interface';
@@ -39,40 +37,7 @@ export class VenueController {
   @Get()
   @ResponseMessage('Get venues successfully')
   async findAll(@Query() query: IVenueQuery) {
-    const relations = ['pitches'];
-
-    const keyword = query.keyword;
-    const order = query.order || OrderEnum.Desc;
-
-    if (keyword) {
-      const ids = await this.searchService.search<VenueSearchBody>('venues', keyword, [
-        'name',
-        'description',
-        'district',
-        'province',
-      ]);
-      return this.venueService.findAndCount(query, {
-        where: {
-          _id: In(ids),
-        },
-        order: { name: order },
-        relations,
-      });
-    }
-    return this.venueService.findAndCount(query, {
-      order: { name: order },
-      relations,
-    });
-  }
-
-  @ApiResponse({
-    description: 'Search venues successfully',
-    type: BasePaginationResponse<Venue>,
-  })
-  @ResponseMessage('Search venues successfully')
-  @Get('/search')
-  async search(@Query() query: ISearchListVenueQuery) {
-    const location = query.location;
+    const { location, page, limit, sorts } = query;
 
     const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
       'name',
@@ -81,33 +46,25 @@ export class VenueController {
       'province',
     ]);
 
-    console.log(ids);
-
-    return this.venueService.searchListVenues(query, ids);
+    return this.venueService.findMany(
+      { page, limit, sorts },
+      {
+        where: {
+          _id: In(ids),
+        },
+        relations: {
+          pitches: true,
+        },
+      },
+    );
   }
 
-  // @Get(':id')
-  // @ResponseMessage('Venue founded successfully')
-  // async findOne(@Param('id') id: number) {
-  //   const data = await this.venueService.findOne({
-  //     where: {
-  //       _id: id,
-  //     },
-  //     relations: {
-  //       pitches: {
-  //         pitchCategory: true,
-  //       },
-  //     },
-  //   });
-
-  //   if (!data) {
-  //     throw new NotFoundException('Venue not found');
-  //   }
-  //   return { data };
-  // }
-
+  @ApiOkResponse({
+    description: 'Get venue successfully!',
+    type: Venue,
+  })
   @Get(':slug')
-  @ResponseMessage('Venue founded successfully')
+  @ResponseMessage('Get venue successfully')
   async findBySlug(@Param('slug') slug: string) {
     const data = await this.venueService.findOne({
       where: {

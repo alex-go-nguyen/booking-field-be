@@ -12,6 +12,9 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "migrate:create": "ts-node ./node_modules/typeorm/cli.js migration:create",
+    "migrate:up": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d ormconfig.ts",
+    "migrate:down": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert -d ormconfig.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -43,7 +46,9 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "streamifier": "^0.1.1",
-    "typeorm": "^0.3.17"
+    "stripe": "^12.17.0",
+    "typeorm": "^0.3.17",
+    "typeorm-seeding": "^1.6.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

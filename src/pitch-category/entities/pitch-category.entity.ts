@@ -1,9 +1,9 @@
-import { TABLE } from 'src/common/constants';
+import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-@Entity(TABLE.PitchCategory)
+@Entity(TABLES.pitchCategory)
 export class PitchCategory extends Base {
   @Column()
   name: string;

@@ -21,15 +21,15 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
         statusCode: context.switchToHttp().getResponse().statusCode,
         ...data,
       })),
-      // catchError((err) =>
-      //   throwError(
-      //     () =>
-      //       new HttpException(
-      //         { messate: err.response.message, statusCode: err.response.statusCode, data: null },
-      //         err.status,
-      //       ),
-      //   ),
-      // ),
+      catchError((err) =>
+        throwError(
+          () =>
+            new HttpException(
+              { messate: err.response.message, statusCode: err.response.statusCode, data: null },
+              err.status,
+            ),
+        ),
+      ),
     );
   }
 }
