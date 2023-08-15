@@ -4,7 +4,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Role } from 'src/common/decorators/roles.decorator';
-import { ERole } from 'src/common/enums/role.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import User from 'src/user/entities/user.entity';
 import { BookingService } from './booking.service';
 import { IBookingQuery } from './dtos/booking-query.dto';
@@ -29,9 +29,36 @@ export class BookingController {
       where: {
         _id: id,
       },
+      relations: {
+        user: true,
+        pitch: {
+          pitchCategory: true,
+          venue: true,
+        },
+        rating: true,
+      },
     });
 
     return { data };
+  }
+
+  @ResponseMessage('Get user bookings successfully')
+  @Get('user/:id')
+  getUserBookings(@Param('id') id: number, @Query() query: IBookingQuery) {
+    return this.bookingService.findMany(query, {
+      where: {
+        user: {
+          _id: id,
+        },
+      },
+      relations: {
+        pitch: {
+          pitchCategory: true,
+          venue: true,
+        },
+        rating: true,
+      },
+    });
   }
 
   @ResponseMessage('Create booking successfully')
@@ -54,7 +81,7 @@ export class BookingController {
   }
 
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(ERole.Admin)
+  @Role(RoleEnum.Admin)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {
