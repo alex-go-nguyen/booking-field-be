@@ -10,9 +10,5 @@ export class CreateBookingDto {
 
   @ApiProperty()
   @IsNumber()
-  user: number;
-
-  @ApiProperty()
-  @IsNumber()
   pitch: number;
 }
