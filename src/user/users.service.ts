@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERole } from 'src/common/enums/role.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { BaseService } from 'src/common/services/base.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Repository } from 'typeorm';
@@ -43,7 +43,7 @@ export class UserService extends BaseService<User, unknown> {
 
     const user = this.userRepository.create({
       ...createUserInput,
-      role: ERole.User,
+      role: RoleEnum.User,
       stripeCustomerId: stripeCustomer.id,
     });
 
