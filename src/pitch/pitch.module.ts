@@ -13,5 +13,6 @@ import { PitchService } from './pitch.service';
   imports: [VenueModule, TypeOrmModule.forFeature([Pitch]), JwtModule, UserModule, PitchCategoryModule, SearchModule],
   providers: [PitchService],
   controllers: [PitchController],
+  exports: [PitchService],
 })
 export class PitchModule {}

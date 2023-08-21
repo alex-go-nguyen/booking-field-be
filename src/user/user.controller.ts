@@ -3,7 +3,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { Role } from 'src/common/decorators/roles.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { IBaseQuery } from 'src/common/dtos/query.dto';
 import { ERole } from 'src/common/enums/role.enum';
 import User from './entities/user.entity';
@@ -20,7 +20,7 @@ export class UserController {
     type: [User],
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(ERole.Admin)
+  @Roles(ERole.Admin)
   @ResponseMessage('Get list users successfully')
   @Get()
   async findAll(@Query() query: IBaseQuery) {

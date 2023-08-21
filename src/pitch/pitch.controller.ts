@@ -1,7 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { ERole } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
 import { Between, In } from 'typeorm';
@@ -114,8 +117,9 @@ export class PitchController {
     description: 'Create pitch successfully!',
     type: Pitch,
   })
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create pitch successfully')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(ERole.Owner, ERole.Admin)
   @Post()
   create(@Body() createPitchDto: CreatePitchDto) {
     return this.pitchService.create(createPitchDto);
@@ -125,8 +129,9 @@ export class PitchController {
     description: 'Update pitch successfully!',
     type: Pitch,
   })
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Update pitch successfully')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(ERole.Owner, ERole.Admin)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchDto: UpdatePitchDto) {
     const data = await this.pitchService.update(id, updatePitchDto);
@@ -137,7 +142,8 @@ export class PitchController {
   @ApiOkResponse({
     description: 'Delete pitch successfully!',
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(ERole.Owner, ERole.Admin)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {

@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services/base.service';
+import { Pitch } from 'src/pitch/entities/pitch.entity';
+import { PitchCategory } from 'src/pitch-category/entities/pitch-category.entity';
 import { Repository } from 'typeorm';
-import { IBookingQuery } from './dtos/booking-query.dto';
+import { IBookingAnalystQuery } from './dtos/booking-analyst-query.dto';
 import { Booking } from './entities/booking.entity';
 
 @Injectable()
@@ -11,49 +13,40 @@ export class BookingService extends BaseService<Booking, unknown> {
     super(bookingRepository);
   }
 
-  async findAllBookings(options: IBookingQuery) {
-    const { date, pitchId, page, limit, sorts } = options;
+  analystIncome(@Query() query: IBookingAnalystQuery) {
+    const { year, venueId } = query;
 
-    const take = limit || 0;
+    const qb = this.bookingRepository
+      .createQueryBuilder('b')
+      .select("TO_CHAR(DATE_TRUNC('DAY', b.startTime), 'mm/dd/yyyy')", 'day')
+      .addSelect('SUM(total_price)::int', 'total')
+      .leftJoin(Pitch, 'p', 'b.pitch_id = p._id')
+      .where("DATE_PART('YEAR', b.startTime) = :year", { year })
+      .andWhere('p.venue_id = :venueId', { venueId })
+      .groupBy("DATE_TRUNC('DAY', b.startTime)");
 
-    const skip = (page - 1) * take;
+    const data = qb.getRawMany();
 
-    const qb = this.bookingRepository.createQueryBuilder('b').select('*');
+    return data;
+  }
 
-    if (date && pitchId) {
-      qb.where('b.pitch_id = :pitchId', { pitchId }).andWhere('DATE(b.startTime) = DATE(:date)', { date });
-    }
+  analystCategory(@Query() query: IBookingAnalystQuery) {
+    const { year, venueId } = query;
 
-    if (page && limit) {
-      qb.take(take).skip(skip);
-    }
+    const qb = this.bookingRepository
+      .createQueryBuilder('b')
+      .select('p.pitchCategory_id', 'pitchCategory_id')
+      .addSelect('pc.name', 'category')
+      .addSelect('COUNT(*)::int', 'total')
+      .leftJoin(Pitch, 'p', 'b.pitch_id = p._id')
+      .leftJoin(PitchCategory, 'pc', 'p.pitchCategory_id = pc._id')
+      .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
+      .andWhere('p.venue_id = :venueId', { venueId })
+      .groupBy('pc.name')
+      .addGroupBy('p.pitchCategory_id');
 
-    if (sorts) {
-      sorts.map((sort) => {
-        const field = Object.keys(sort);
-        const order = sort[`${field}`];
+    const data = qb.getRawMany();
 
-        console.log(field[0], order);
-        qb.addOrderBy(`b.${field[0]}`, order);
-      });
-    }
-
-    const dataQb = qb.getRawMany();
-    const countQb = qb.getCount();
-
-    const [data, total] = await Promise.all([dataQb, countQb]);
-
-    const pageCount = take === 0 ? 1 : Math.ceil(total / take);
-    const pageSize = take === 0 ? total : take;
-
-    return {
-      data,
-      pageInfo: {
-        page,
-        pageSize,
-        pageCount,
-        count: total,
-      },
-    };
+    return data;
   }
 }

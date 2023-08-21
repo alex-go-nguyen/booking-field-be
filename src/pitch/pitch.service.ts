@@ -18,7 +18,7 @@ export class PitchService extends BaseService<Pitch, unknown> {
       .select('p.pitchCategory_id')
       .addSelect('p.price', 'price')
       .addSelect('c.*')
-      .addSelect('count(p.pitchCategory_id)', 'quantity')
+      .addSelect('count(p.pitchCategory_id)::int', 'quantity')
       .leftJoin(PitchCategory, 'c', 'p.pitchCategory_id = c._id')
       .where('p.venue_id = :venueId', { venueId })
       .groupBy('p.pitchCategory_id')

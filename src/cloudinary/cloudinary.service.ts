@@ -1,19 +1,47 @@
-import { Injectable } from '@nestjs/common';
-import { v2 as cloudinary } from 'cloudinary';
-import streamifier from 'streamifier';
-import { CloudinaryResponse } from './interfaces/cloudinary-response.interface';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import toStream = require('buffer-to-stream');
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+
+interface IUploadImage {
+  userId: number;
+  file: Express.Multer.File;
+}
+
+interface IUploadImages extends Omit<IUploadImage, 'file'> {
+  files: Array<Express.Multer.File>;
+}
 
 @Injectable()
 export class CloudinaryService {
-  uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
-    return new Promise<CloudinaryResponse>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      });
+  constructor(private readonly configService: ConfigService) {}
 
-      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+  async uploadImage({ userId, file }: IUploadImage): Promise<UploadApiResponse> {
+    const environment = this.configService.get('NODE_ENV');
+    return new Promise((resolve) => {
+      const upload = cloudinary.uploader.upload_stream(
+        {
+          folder: `${environment}/${userId}`,
+        },
+        (error, result) => {
+          if (error) throw new UnprocessableEntityException(error.message);
+          resolve(result);
+        },
+      );
+
+      toStream(file.buffer).pipe(upload);
     });
+  }
+
+  async uploadImages({ userId, files }: IUploadImages): Promise<UploadApiResponse[]> {
+    const promiseUploadImages = files.map((file) =>
+      this.uploadImage({
+        userId,
+        file,
+      }),
+    );
+
+    return await Promise.all(promiseUploadImages);
   }
 
   async deleteFile(id: string) {

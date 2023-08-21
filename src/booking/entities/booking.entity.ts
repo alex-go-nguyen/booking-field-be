@@ -13,6 +13,9 @@ export class Booking extends Base {
   @Column()
   endTime: Date;
 
+  @Column()
+  total_price: number;
+
   @ManyToOne(() => Pitch, (pitch) => pitch.bookings)
   @JoinColumn()
   pitch: Pitch;
