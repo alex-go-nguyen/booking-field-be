@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Booking } from 'src/booking/entities/booking.entity';
-import { IPagination } from 'src/common/dtos/pagination.dto';
+import { Pagination } from 'src/common/dtos/pagination.dto';
 import { OrderEnum } from 'src/common/enums/order.enum';
 import { BaseService } from 'src/common/services/base.service';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
@@ -16,7 +16,7 @@ export class RatingService extends BaseService<Rating, unknown> {
     super(ratingRepository);
   }
 
-  async findByVenue(venueId: number, query: IPagination) {
+  async findByVenue(venueId: number, query: Pagination) {
     const { limit, page } = query;
     const take = limit || 0;
     const skip = (page - 1) * take;

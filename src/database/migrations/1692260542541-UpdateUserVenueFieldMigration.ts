@@ -47,6 +47,6 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
     const venueForeignKey = tableVenue.foreignKeys.find((fk) => fk.columnNames.indexOf('user_id') !== -1);
 
     queryRunner.dropForeignKey(TABLES.user, userForeignKey);
-    queryRunner.dropForeignKey(TABLES.rating, venueForeignKey);
+    queryRunner.dropForeignKey(TABLES.venue, venueForeignKey);
   }
 }

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERole } from 'src/common/enums/role.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { BaseService } from 'src/common/services/base.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Repository } from 'typeorm';
@@ -18,7 +18,7 @@ export class UserService extends BaseService<User, unknown> {
   }
 
   async me(username: string) {
-    const user = await this.userRepository.findOne({ where: { username } });
+    const user = await this.userRepository.findOne({ where: { username }, relations: { venue: true } });
     user.password = undefined;
 
     return user;
@@ -28,6 +28,9 @@ export class UserService extends BaseService<User, unknown> {
     return this.userRepository.findOne({
       where: {
         username,
+      },
+      relations: {
+        venue: true,
       },
     });
   }
@@ -43,7 +46,7 @@ export class UserService extends BaseService<User, unknown> {
 
     const user = this.userRepository.create({
       ...createUserInput,
-      role: ERole.User,
+      role: RoleEnum.User,
       stripeCustomerId: stripeCustomer.id,
     });
 

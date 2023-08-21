@@ -15,8 +15,8 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
-import { IPagination } from 'src/common/dtos/pagination.dto';
-import { IBaseQuery } from 'src/common/dtos/query.dto';
+import { Pagination } from 'src/common/dtos/pagination.dto';
+import { BaseQuery } from 'src/common/dtos/query.dto';
 import { CreateRatingDto } from './dtos/create-rating.dto';
 import { UpdateRatingDto } from './dtos/update-rating.dto';
 import { Rating } from './entities/rating.entity';
@@ -33,7 +33,7 @@ export class RatingController {
   })
   @ResponseMessage('Get ratings successfully')
   @Get()
-  async findAll(@Query() query: IBaseQuery) {
+  async findAll(@Query() query: BaseQuery) {
     const data = await this.ratingService.findMany(query);
 
     return { data };
@@ -61,7 +61,7 @@ export class RatingController {
   })
   @ResponseMessage('Get ratings by venue successfully')
   @Get('venue/:venueId')
-  findByVenue(@Param('venueId') venueId: number, @Query() query: IPagination) {
+  findByVenue(@Param('venueId') venueId: number, @Query() query: Pagination) {
     return this.ratingService.findByVenue(venueId, query);
   }
 

@@ -4,8 +4,8 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { IBaseQuery } from 'src/common/dtos/query.dto';
-import { ERole } from 'src/common/enums/role.enum';
+import { BaseQuery } from 'src/common/dtos/query.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import User from './entities/user.entity';
 import { CurrentUser } from './user.decorator';
 import { UserService } from './users.service';
@@ -20,10 +20,10 @@ export class UserController {
     type: [User],
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Admin)
+  @Roles(RoleEnum.Admin)
   @ResponseMessage('Get list users successfully')
   @Get()
-  async findAll(@Query() query: IBaseQuery) {
+  async findAll(@Query() query: BaseQuery) {
     const data = await this.userService.findMany(query);
 
     return { data };

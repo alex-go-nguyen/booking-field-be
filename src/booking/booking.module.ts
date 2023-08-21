@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PitchModule } from 'src/pitch/pitch.module';
-import { PitchService } from 'src/pitch/pitch.service';
 import { UserModule } from 'src/user/users.module';
 import { BookingController } from './booking.controller';
 import { BookingService } from './booking.service';

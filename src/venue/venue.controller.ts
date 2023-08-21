@@ -18,11 +18,11 @@ import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
-import { ERole } from 'src/common/enums/role.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { In } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
-import { IVenueQuery } from './dtos/query-venue.dto';
+import { VenueQuery } from './dtos/query-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
 import { VenueSearchBody } from './interfaces/venue-search.interface';
@@ -39,7 +39,7 @@ export class VenueController {
   })
   @Get()
   @ResponseMessage('Get venues successfully')
-  async findAll(@Query() query: IVenueQuery) {
+  async findAll(@Query() query: VenueQuery) {
     const { location, page, limit, sorts } = query;
 
     const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
@@ -118,7 +118,7 @@ export class VenueController {
     type: BaseResponse<Venue>,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Admin)
+  @Roles(RoleEnum.Admin)
   @Post()
   @ResponseMessage('Create Venue successfully')
   async create(@Body() createVenueDto: CreateVenueDto) {
@@ -142,7 +142,7 @@ export class VenueController {
     type: BaseResponse<Venue>,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner)
+  @Roles(RoleEnum.Owner)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
     const data = await this.venueService.update(id, updateVenueDto);
@@ -152,7 +152,7 @@ export class VenueController {
 
   @HttpCode(204)
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Admin)
+  @Roles(RoleEnum.Admin)
   @Delete(':id')
   delete(@Param('id') id: number) {
     this.venueService.softDelete(id);

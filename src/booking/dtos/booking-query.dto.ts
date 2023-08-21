@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDateString, IsInt, IsOptional } from 'class-validator';
-import { IBaseQuery } from 'src/common/dtos/query.dto';
+import { BaseQuery } from 'src/common/dtos/query.dto';
 
-export class IBookingQuery extends IBaseQuery {
+export class BookingQuery extends BaseQuery {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()

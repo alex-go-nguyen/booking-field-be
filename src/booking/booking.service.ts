@@ -1,10 +1,10 @@
-import { Injectable, Query } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services/base.service';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { PitchCategory } from 'src/pitch-category/entities/pitch-category.entity';
 import { Repository } from 'typeorm';
-import { IBookingAnalystQuery } from './dtos/booking-analyst-query.dto';
+import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
 import { Booking } from './entities/booking.entity';
 
 @Injectable()
@@ -13,26 +13,20 @@ export class BookingService extends BaseService<Booking, unknown> {
     super(bookingRepository);
   }
 
-  analystIncome(@Query() query: IBookingAnalystQuery) {
-    const { year, venueId } = query;
-
+  analystIncome({ year, venueId }: BookingAnalystQuery) {
     const qb = this.bookingRepository
       .createQueryBuilder('b')
-      .select("TO_CHAR(DATE_TRUNC('DAY', b.startTime), 'mm/dd/yyyy')", 'day')
+      .select("TO_CHAR(DATE_TRUNC('DAY', b.createdAt), 'mm/dd/yyyy')", 'day')
       .addSelect('SUM(total_price)::int', 'total')
       .leftJoin(Pitch, 'p', 'b.pitch_id = p._id')
-      .where("DATE_PART('YEAR', b.startTime) = :year", { year })
+      .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
       .andWhere('p.venue_id = :venueId', { venueId })
-      .groupBy("DATE_TRUNC('DAY', b.startTime)");
+      .groupBy("DATE_TRUNC('DAY', b.createdAt)");
 
-    const data = qb.getRawMany();
-
-    return data;
+    return qb.getRawMany();
   }
 
-  analystCategory(@Query() query: IBookingAnalystQuery) {
-    const { year, venueId } = query;
-
+  analystCategory({ year, venueId }: BookingAnalystQuery) {
     const qb = this.bookingRepository
       .createQueryBuilder('b')
       .select('p.pitchCategory_id', 'pitchCategory_id')
@@ -45,8 +39,6 @@ export class BookingService extends BaseService<Booking, unknown> {
       .groupBy('pc.name')
       .addGroupBy('p.pitchCategory_id');
 
-    const data = qb.getRawMany();
-
-    return data;
+    return qb.getRawMany();
   }
 }

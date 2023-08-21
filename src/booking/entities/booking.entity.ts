@@ -1,3 +1,4 @@
+import { IsPositive } from 'class-validator';
 import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
@@ -14,7 +15,8 @@ export class Booking extends Base {
   endTime: Date;
 
   @Column()
-  total_price: number;
+  @IsPositive()
+  totalPrice: number;
 
   @ManyToOne(() => Pitch, (pitch) => pitch.bookings)
   @JoinColumn()

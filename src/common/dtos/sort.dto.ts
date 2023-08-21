@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { OrderEnum } from '../enums/order.enum';
 
-export class ISortQuery {
+export class SortQuery {
   @ApiProperty()
   field: string;
 

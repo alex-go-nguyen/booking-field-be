@@ -1,18 +1,19 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { IBaseQuery } from 'src/common/dtos/query.dto';
-import { ERole } from 'src/common/enums/role.enum';
+import { ReqUser } from 'src/common/decorators/user.decorator';
+import { BaseQuery } from 'src/common/dtos/query.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { dateToTimeFloat } from 'src/common/utils';
 import { PitchService } from 'src/pitch/pitch.service';
 import User from 'src/user/entities/user.entity';
 import { Raw } from 'typeorm';
 import { BookingService } from './booking.service';
-import { IBookingAnalystQuery } from './dtos/booking-analyst-query.dto';
-import { IBookingQuery } from './dtos/booking-query.dto';
+import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
+import { BookingQuery } from './dtos/booking-query.dto';
 import { CreateBookingDto } from './dtos/create-booking.dto';
 import { UpdateBookingDto } from './dtos/update-booking.dto';
 
@@ -23,7 +24,7 @@ export class BookingController {
 
   @ResponseMessage('Get bookings successfully')
   @Get()
-  findAll(@Query() query: IBookingQuery) {
+  findAll(@Query() query: BookingQuery) {
     const { pitchId, venueId, date } = query;
     return this.bookingService.findMany(query, {
       where: {
@@ -53,8 +54,8 @@ export class BookingController {
   @ResponseMessage('Get analyst successfully')
   @Get('analyst')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner, ERole.Admin)
-  async analystIncome(@Query() query: IBookingAnalystQuery) {
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  async analystIncome(@Query() query: BookingAnalystQuery) {
     const data = await this.bookingService.analystIncome(query);
 
     return { data };
@@ -63,8 +64,8 @@ export class BookingController {
   @ResponseMessage('Get analyst by category successfully')
   @Get('analyst/category')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner, ERole.Admin)
-  async analystCategory(@Query() query: IBookingAnalystQuery) {
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  async analystCategory(@Query() query: BookingAnalystQuery) {
     const data = await this.bookingService.analystCategory(query);
 
     return { data };
@@ -85,8 +86,8 @@ export class BookingController {
   @ResponseMessage('Get booking of venue successfully')
   @Get('venue/:venueId')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner, ERole.Admin)
-  findByVenue(@Param('venueId') venueId: number, @Query() query: IBaseQuery) {
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  findByVenue(@Param('venueId') venueId: number, @Query() query: BaseQuery) {
     return this.bookingService.findMany(query, {
       where: {
         pitch: {
@@ -107,9 +108,7 @@ export class BookingController {
   @ResponseMessage('Create booking successfully')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createBookingDto: CreateBookingDto, @Req() req) {
-    const user: User = req['user'];
-
+  async create(@Body() createBookingDto: CreateBookingDto, @ReqUser() user: User) {
     const { pitch: pitchId, startTime, endTime } = createBookingDto;
 
     const pitch = await this.pitchService.findOne({
@@ -120,11 +119,7 @@ export class BookingController {
 
     const totalPrice = pitch.price * (dateToTimeFloat(new Date(endTime)) - dateToTimeFloat(new Date(startTime)));
 
-    console.log(totalPrice);
-
     const payload = { ...createBookingDto, user: user._id, total_price: totalPrice };
-
-    console.log(payload);
 
     const data = await this.bookingService.create(payload);
 
@@ -140,7 +135,7 @@ export class BookingController {
   }
 
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Admin)
+  @Roles(RoleEnum.Admin)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {

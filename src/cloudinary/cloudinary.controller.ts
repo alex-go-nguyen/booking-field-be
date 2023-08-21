@@ -2,10 +2,8 @@ import {
   Controller,
   Delete,
   HttpCode,
-  HttpStatus,
   Param,
   Post,
-  Req,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -14,6 +12,8 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { ReqUser } from 'src/common/decorators/user.decorator';
 import User from 'src/user/entities/user.entity';
 import { CloudinaryService } from './cloudinary.service';
 
@@ -22,23 +22,21 @@ import { CloudinaryService } from './cloudinary.service';
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
+  @ResponseMessage('Upload file successfully!')
   @Post('file')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req) {
-    const user: User = req['user'];
-
+  async uploadImage(@UploadedFile() file: Express.Multer.File, @ReqUser() user: User) {
     const data = await this.cloudinaryService.uploadImage({ userId: user._id, file });
 
     return { data };
   }
 
   @Post('files')
+  @ResponseMessage('Upload files successfully!')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10))
-  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @Req() req) {
-    const user: User = req['user'];
-
+  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @ReqUser() user: User) {
     const data = await this.cloudinaryService.uploadImages({
       userId: user._id,
       files,
@@ -48,7 +46,9 @@ export class CloudinaryController {
   }
 
   @HttpCode(204)
+  @ResponseMessage('Delete file successfully!')
   @Delete('files/:id')
+  @UseGuards(JwtAuthGuard)
   deleteImage(@Param('id') id: string) {
     return this.cloudinaryService.deleteFile(id);
   }

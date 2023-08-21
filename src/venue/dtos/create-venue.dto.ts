@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { ILocation } from '../interfaces/location.interface';
+import { Location } from '../interfaces/location.interface';
 
 export class CreateVenueDto {
   @ApiProperty()
@@ -11,8 +11,8 @@ export class CreateVenueDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ type: ILocation })
-  location: ILocation;
+  @ApiProperty({ type: Location })
+  location: Location;
 
   @ApiProperty()
   @IsString()

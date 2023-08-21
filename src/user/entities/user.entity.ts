@@ -3,7 +3,7 @@ import { IsEmail } from 'class-validator';
 import { Booking } from 'src/booking/entities/booking.entity';
 import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
-import { ERole } from 'src/common/enums/role.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { Venue } from 'src/venue/entities/venue.entity';
 import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 
@@ -33,10 +33,10 @@ export default class User extends Base {
 
   @Column({
     type: 'enum',
-    enum: ERole,
-    default: ERole.User,
+    enum: RoleEnum,
+    default: RoleEnum.User,
   })
-  role: ERole;
+  role: RoleEnum;
 
   @OneToOne(() => Venue, (venue) => venue.user)
   @JoinColumn()

@@ -4,13 +4,13 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { ERole } from 'src/common/enums/role.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
 import { Between, In } from 'typeorm';
 import { CreatePitchDto } from './dtos/create-pitch.dto';
 import { FindPitchQueryDto } from './dtos/find-pitch.dto';
-import { IPitchQuery } from './dtos/pitch-query.dto';
+import { PitchQuery } from './dtos/pitch-query.dto';
 import { UpdatePitchDto } from './dtos/update-pitch.dto';
 import { Pitch } from './entities/pitch.entity';
 import { PitchService } from './pitch.service';
@@ -26,7 +26,7 @@ export class PitchController {
   })
   @ResponseMessage('Get all pitches successfully')
   @Get()
-  async findAll(@Query() query: IPitchQuery) {
+  async findAll(@Query() query: PitchQuery) {
     const { page, limit, pitchCategoryId, minPrice, maxPrice, location, sorts } = query;
 
     let ids: number[] = [];
@@ -119,7 +119,7 @@ export class PitchController {
   })
   @ResponseMessage('Create pitch successfully')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner, ERole.Admin)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @Post()
   create(@Body() createPitchDto: CreatePitchDto) {
     return this.pitchService.create(createPitchDto);
@@ -131,7 +131,7 @@ export class PitchController {
   })
   @ResponseMessage('Update pitch successfully')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner, ERole.Admin)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchDto: UpdatePitchDto) {
     const data = await this.pitchService.update(id, updatePitchDto);
@@ -143,7 +143,7 @@ export class PitchController {
     description: 'Delete pitch successfully!',
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(ERole.Owner, ERole.Admin)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {

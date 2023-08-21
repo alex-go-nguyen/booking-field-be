@@ -3,12 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import toStream = require('buffer-to-stream');
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 
-interface IUploadImage {
+interface UploadImage {
   userId: number;
   file: Express.Multer.File;
 }
 
-interface IUploadImages extends Omit<IUploadImage, 'file'> {
+interface UploadImages extends Omit<UploadImage, 'file'> {
   files: Array<Express.Multer.File>;
 }
 
@@ -16,7 +16,7 @@ interface IUploadImages extends Omit<IUploadImage, 'file'> {
 export class CloudinaryService {
   constructor(private readonly configService: ConfigService) {}
 
-  async uploadImage({ userId, file }: IUploadImage): Promise<UploadApiResponse> {
+  async uploadImage({ userId, file }: UploadImage): Promise<UploadApiResponse> {
     const environment = this.configService.get('NODE_ENV');
     return new Promise((resolve) => {
       const upload = cloudinary.uploader.upload_stream(
@@ -33,7 +33,7 @@ export class CloudinaryService {
     });
   }
 
-  async uploadImages({ userId, files }: IUploadImages): Promise<UploadApiResponse[]> {
+  async uploadImages({ userId, files }: UploadImages): Promise<UploadApiResponse[]> {
     const promiseUploadImages = files.map((file) =>
       this.uploadImage({
         userId,
