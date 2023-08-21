@@ -78,6 +78,14 @@ export class BookingController {
       where: {
         _id: id,
       },
+      relations: {
+        user: true,
+        pitch: {
+          pitchCategory: true,
+          venue: true,
+        },
+        rating: true,
+      },
     });
 
     return { data };
@@ -99,8 +107,9 @@ export class BookingController {
       relations: {
         pitch: {
           pitchCategory: true,
+          venue: true,
         },
-        user: true,
+        rating: true,
       },
     });
   }

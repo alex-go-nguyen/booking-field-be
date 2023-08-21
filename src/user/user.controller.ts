@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
@@ -6,6 +6,7 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
+import { UpdateUserInfoDto } from './dtos/update-info-user.dto';
 import User from './entities/user.entity';
 import { CurrentUser } from './user.decorator';
 import { UserService } from './users.service';
@@ -54,5 +55,25 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   getProfile(@CurrentUser() user: User) {
     return { data: user };
+  }
+
+  @ApiOkResponse({
+    description: 'Update profile successfully!',
+    type: User,
+  })
+  @ResponseMessage('Update profile successfully!')
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserInfoDto) {
+    const data = await this.userService.update(id, updateUserDto);
+    return { data };
+  }
+
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.Admin)
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    this.userService.softDelete(id);
   }
 }

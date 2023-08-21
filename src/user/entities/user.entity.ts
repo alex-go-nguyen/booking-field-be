@@ -5,7 +5,7 @@ import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { Venue } from 'src/venue/entities/venue.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 
 @Entity(TABLES.user)
 export default class User extends Base {
@@ -46,7 +46,6 @@ export default class User extends Base {
   bookings: Booking[];
 
   @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
