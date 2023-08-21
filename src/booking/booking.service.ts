@@ -17,7 +17,7 @@ export class BookingService extends BaseService<Booking, unknown> {
     const qb = this.bookingRepository
       .createQueryBuilder('b')
       .select("TO_CHAR(DATE_TRUNC('DAY', b.createdAt), 'mm/dd/yyyy')", 'day')
-      .addSelect('SUM(total_price)::int', 'total')
+      .addSelect('SUM(b.totalPrice)::int', 'total')
       .leftJoin(Pitch, 'p', 'b.pitch_id = p._id')
       .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
       .andWhere('p.venue_id = :venueId', { venueId })

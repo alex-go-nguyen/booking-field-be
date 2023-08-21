@@ -114,6 +114,25 @@ export class BookingController {
     });
   }
 
+  @ResponseMessage('Get user bookings successfully')
+  @Get('user/:id')
+  getUserBookings(@Param('id') id: number, @Query() query: BookingQuery) {
+    return this.bookingService.findMany(query, {
+      where: {
+        user: {
+          _id: id,
+        },
+      },
+      relations: {
+        pitch: {
+          pitchCategory: true,
+          venue: true,
+        },
+        rating: true,
+      },
+    });
+  }
+
   @ResponseMessage('Create booking successfully')
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -128,7 +147,7 @@ export class BookingController {
 
     const totalPrice = pitch.price * (dateToTimeFloat(new Date(endTime)) - dateToTimeFloat(new Date(startTime)));
 
-    const payload = { ...createBookingDto, user: user._id, total_price: totalPrice };
+    const payload = { ...createBookingDto, user: user._id, totalPrice };
 
     const data = await this.bookingService.create(payload);
 
