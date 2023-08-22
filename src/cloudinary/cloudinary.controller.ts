@@ -13,8 +13,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { ReqUser } from 'src/common/decorators/user.decorator';
-import User from 'src/user/entities/user.entity';
+import { CurrentUser } from 'src/user/user.decorator';
 import { CloudinaryService } from './cloudinary.service';
 
 @ApiTags('Upload')
@@ -26,8 +25,8 @@ export class CloudinaryController {
   @Post('file')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @ReqUser() user: User) {
-    const data = await this.cloudinaryService.uploadImage({ userId: user._id, file });
+  async uploadImage(@UploadedFile() file: Express.Multer.File, @CurrentUser('_id') userId: number) {
+    const data = await this.cloudinaryService.uploadImage({ userId, file });
 
     return { data };
   }
@@ -36,9 +35,9 @@ export class CloudinaryController {
   @ResponseMessage('Upload files successfully!')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10))
-  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @ReqUser() user: User) {
+  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @CurrentUser('_id') userId: number) {
     const data = await this.cloudinaryService.uploadImages({
-      userId: user._id,
+      userId,
       files,
     });
 

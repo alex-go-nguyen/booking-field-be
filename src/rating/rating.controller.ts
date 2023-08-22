@@ -15,9 +15,8 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
-import { Pagination } from 'src/common/dtos/pagination.dto';
-import { BaseQuery } from 'src/common/dtos/query.dto';
 import { CreateRatingDto } from './dtos/create-rating.dto';
+import { RatingQuery } from './dtos/rating-query.dto';
 import { UpdateRatingDto } from './dtos/update-rating.dto';
 import { Rating } from './entities/rating.entity';
 import { RatingService } from './rating.service';
@@ -33,10 +32,31 @@ export class RatingController {
   })
   @ResponseMessage('Get ratings successfully')
   @Get()
-  async findAll(@Query() query: BaseQuery) {
-    const data = await this.ratingService.findMany(query);
+  findAll(@Query() query: RatingQuery) {
+    const { venueId } = query;
 
-    return { data };
+    return this.ratingService.findAndCount(query, {
+      where: {
+        ...(venueId && {
+          booking: {
+            pitch: {
+              venue: {
+                _id: venueId,
+              },
+            },
+          },
+        }),
+      },
+      relations: {
+        booking: {
+          user: true,
+          pitch: {
+            pitchCategory: true,
+            venue: true,
+          },
+        },
+      },
+    });
   }
 
   @ApiResponse({
@@ -53,16 +73,6 @@ export class RatingController {
     });
 
     return { data };
-  }
-
-  @ApiResponse({
-    description: 'Get ratings by venue successfully',
-    type: BasePaginationResponse<Rating[]>,
-  })
-  @ResponseMessage('Get ratings by venue successfully')
-  @Get('venue/:venueId')
-  findByVenue(@Param('venueId') venueId: number, @Query() query: Pagination) {
-    return this.ratingService.findByVenue(venueId, query);
   }
 
   @ApiResponse({

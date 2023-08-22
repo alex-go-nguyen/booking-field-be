@@ -25,7 +25,7 @@ export class UserController {
   @ResponseMessage('Get list users successfully')
   @Get()
   async findAll(@Query() query: BaseQuery) {
-    const data = await this.userService.findMany(query);
+    const data = await this.userService.findAndCount(query);
 
     return { data };
   }

@@ -4,12 +4,10 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { ReqUser } from 'src/common/decorators/user.decorator';
-import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { dateToTimeFloat } from 'src/common/utils';
 import { PitchService } from 'src/pitch/pitch.service';
-import User from 'src/user/entities/user.entity';
+import { CurrentUser } from 'src/user/user.decorator';
 import { Raw } from 'typeorm';
 import { BookingService } from './booking.service';
 import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
@@ -23,10 +21,11 @@ export class BookingController {
   constructor(private readonly bookingService: BookingService, private readonly pitchService: PitchService) {}
 
   @ResponseMessage('Get bookings successfully')
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: BookingQuery) {
     const { pitchId, venueId, date } = query;
-    return this.bookingService.findMany(query, {
+    return this.bookingService.findAndCount(query, {
       where: {
         ...(venueId && {
           pitch: {
@@ -91,33 +90,10 @@ export class BookingController {
     return { data };
   }
 
-  @ResponseMessage('Get booking of venue successfully')
-  @Get('venue/:venueId')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(RoleEnum.Owner, RoleEnum.Admin)
-  findByVenue(@Param('venueId') venueId: number, @Query() query: BaseQuery) {
-    return this.bookingService.findMany(query, {
-      where: {
-        pitch: {
-          venue: {
-            _id: venueId,
-          },
-        },
-      },
-      relations: {
-        pitch: {
-          pitchCategory: true,
-          venue: true,
-        },
-        rating: true,
-      },
-    });
-  }
-
   @ResponseMessage('Get user bookings successfully')
-  @Get('user/:id')
-  getUserBookings(@Param('id') id: number, @Query() query: BookingQuery) {
-    return this.bookingService.findMany(query, {
+  @Get('user')
+  getUserBookings(@CurrentUser('_id') id: number, @Query() query: BookingQuery) {
+    return this.bookingService.findAndCount(query, {
       where: {
         user: {
           _id: id,
@@ -136,7 +112,7 @@ export class BookingController {
   @ResponseMessage('Create booking successfully')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createBookingDto: CreateBookingDto, @ReqUser() user: User) {
+  async create(@Body() createBookingDto: CreateBookingDto, @CurrentUser('_id') userId: number) {
     const { pitch: pitchId, startTime, endTime } = createBookingDto;
 
     const pitch = await this.pitchService.findOne({
@@ -147,7 +123,7 @@ export class BookingController {
 
     const totalPrice = pitch.price * (dateToTimeFloat(new Date(endTime)) - dateToTimeFloat(new Date(startTime)));
 
-    const payload = { ...createBookingDto, user: user._id, totalPrice };
+    const payload = { ...createBookingDto, user: userId, totalPrice };
 
     const data = await this.bookingService.create(payload);
 

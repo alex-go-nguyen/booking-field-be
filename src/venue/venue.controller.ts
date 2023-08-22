@@ -49,7 +49,7 @@ export class VenueController {
       'province',
     ]);
 
-    return this.venueService.findMany(
+    return this.venueService.findAndCount(
       { page, limit, sorts },
       {
         where: {

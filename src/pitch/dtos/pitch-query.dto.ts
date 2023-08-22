@@ -21,4 +21,10 @@ export class PitchQuery extends BaseQuery {
   @ApiPropertyOptional()
   @IsOptional()
   location: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  venueId: number;
 }

@@ -6,7 +6,7 @@ import { Base } from '../entities/base.entity';
 export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
   constructor(protected repo: Repository<Entity>) {}
 
-  async findMany(query?: BaseQuery, options?: FindManyOptions<Entity>) {
+  async findAndCount(query?: BaseQuery, options?: FindManyOptions<Entity>) {
     const { limit, page, sorts } = query;
 
     const take = limit || 0;
