@@ -117,8 +117,8 @@ export class VenueController {
     description: 'Create Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Post()
   @ResponseMessage('Create Venue successfully')
   async create(@Body() createVenueDto: CreateVenueDto) {
@@ -141,8 +141,8 @@ export class VenueController {
     description: 'Update Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner)
+  @UseGuards(RoleGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
     const data = await this.venueService.update(id, updateVenueDto);
@@ -151,8 +151,8 @@ export class VenueController {
   }
 
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     this.venueService.softDelete(id);

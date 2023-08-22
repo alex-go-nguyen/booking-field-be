@@ -5,9 +5,9 @@ import { UserService } from 'src/user/users.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private userService: UserService) {}
+  constructor(protected jwtService: JwtService, protected userService: UserService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 

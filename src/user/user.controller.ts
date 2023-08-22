@@ -20,8 +20,8 @@ export class UserController {
     description: 'Get list users successfully!',
     type: [User],
   })
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @ResponseMessage('Get list users successfully')
   @Get()
   async findAll(@Query() query: BaseQuery) {
@@ -70,8 +70,8 @@ export class UserController {
   }
 
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     this.userService.softDelete(id);

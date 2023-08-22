@@ -52,8 +52,8 @@ export class BookingController {
 
   @ResponseMessage('Get analyst successfully')
   @Get('analyst')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   async analystIncome(@Query() query: BookingAnalystQuery) {
     const data = await this.bookingService.analystIncome(query);
 
@@ -62,8 +62,8 @@ export class BookingController {
 
   @ResponseMessage('Get analyst by category successfully')
   @Get('analyst/category')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   async analystCategory(@Query() query: BookingAnalystQuery) {
     const data = await this.bookingService.analystCategory(query);
 
@@ -138,7 +138,7 @@ export class BookingController {
     return { data };
   }
 
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  @UseGuards(RoleGuard)
   @Roles(RoleEnum.Admin)
   @HttpCode(204)
   @Delete(':id')
