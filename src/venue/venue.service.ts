@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services/base.service';
 import { Repository } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
-import { ISearchListVenueQuery } from './dtos/search-list-venue.dto';
+import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { Venue } from './entities/venue.entity';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class VenueService extends BaseService<Venue, CreateVenueDto> {
     super(venueRepository);
   }
 
-  async searchListVenues(query?: ISearchListVenueQuery, venueIds?: Array<number>) {
+  async searchListVenues(query?: SearchListVenueQuery, venueIds?: Array<number>) {
     const { limit, page, sorts, maxPrice, minPrice, pitchCategory: pitchCategory } = query;
     const take = limit || 0;
     const skip = (page - 1) * take;
@@ -42,7 +42,6 @@ export class VenueService extends BaseService<Venue, CreateVenueDto> {
         const field = Object.keys(sort);
         const order = sort[`${field}`];
 
-        console.log(field, order);
         mainQb.addOrderBy(`b.${field[0]}`, order);
       });
     }

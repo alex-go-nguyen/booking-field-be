@@ -1,13 +1,15 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
 import { Between, In } from 'typeorm';
 import { CreatePitchDto } from './dtos/create-pitch.dto';
-import { FindPitchQueryDto } from './dtos/find-pitch.dto';
-import { IPitchQuery } from './dtos/pitch-query.dto';
+import { PitchQuery } from './dtos/pitch-query.dto';
 import { UpdatePitchDto } from './dtos/update-pitch.dto';
 import { Pitch } from './entities/pitch.entity';
 import { PitchService } from './pitch.service';
@@ -23,8 +25,8 @@ export class PitchController {
   })
   @ResponseMessage('Get all pitches successfully')
   @Get()
-  async findAll(@Query() query: IPitchQuery) {
-    const { page, limit, pitchCategoryId, minPrice, maxPrice, location, sorts } = query;
+  async findAll(@Query() query: PitchQuery) {
+    const { page, limit, pitchCategoryId, venueId, minPrice, maxPrice, location, sorts } = query;
 
     let ids: number[] = [];
     if (location) {
@@ -36,17 +38,29 @@ export class PitchController {
       ]);
     }
 
-    return this.pitchService.findMany(
+    return this.pitchService.findAndCount(
       { page, limit, sorts },
       {
         where: {
-          price: minPrice && maxPrice && Between(minPrice, maxPrice),
-          pitchCategory: {
-            _id: pitchCategoryId && pitchCategoryId,
-          },
-          venue: {
-            _id: location && In(ids),
-          },
+          ...(minPrice &&
+            maxPrice && {
+              price: Between(minPrice, maxPrice),
+            }),
+          ...(pitchCategoryId && {
+            pitchCategory: {
+              _id: pitchCategoryId,
+            },
+          }),
+          ...(location && {
+            venue: {
+              _id: In(ids),
+            },
+          }),
+          ...(venueId && {
+            venue: {
+              _id: venueId,
+            },
+          }),
         },
         relations: {
           pitchCategory: true,
@@ -54,44 +68,6 @@ export class PitchController {
         },
       },
     );
-  }
-
-  @ApiOkResponse({
-    description: 'Get all pitch by venue detail page successfully!',
-    type: [Pitch],
-  })
-  @ResponseMessage('Get pitch by venue detail page successfully')
-  @Get('venue-detail/:venueId')
-  async findInVenueDetail(@Param('venueId') venueId: number) {
-    const data = await this.pitchService.findInVenueDetail(venueId);
-
-    return { data };
-  }
-
-  @ApiOkResponse({
-    description: 'Get pitches by venue successfully!',
-    type: [Pitch],
-  })
-  @ResponseMessage('Get pitches by venue successfully')
-  @Get('venue/:venueId')
-  async findByVenue(@Param('venueId') venueId: number, @Query() query: FindPitchQueryDto) {
-    const relations = ['venue', 'pitchCategory'];
-
-    const { pitchCategoryId } = query;
-
-    const data = await this.pitchService.findAll({
-      where: {
-        venue: {
-          _id: venueId,
-        },
-        pitchCategory: {
-          _id: pitchCategoryId,
-        },
-      },
-      relations,
-    });
-
-    return { data };
   }
 
   @ApiOkResponse({
@@ -114,8 +90,9 @@ export class PitchController {
     description: 'Create pitch successfully!',
     type: Pitch,
   })
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create pitch successfully')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @Post()
   create(@Body() createPitchDto: CreatePitchDto) {
     return this.pitchService.create(createPitchDto);
@@ -125,8 +102,9 @@ export class PitchController {
     description: 'Update pitch successfully!',
     type: Pitch,
   })
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Update pitch successfully')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchDto: UpdatePitchDto) {
     const data = await this.pitchService.update(id, updatePitchDto);
@@ -137,7 +115,8 @@ export class PitchController {
   @ApiOkResponse({
     description: 'Delete pitch successfully!',
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {

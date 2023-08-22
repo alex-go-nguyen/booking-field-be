@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ILocation {
+export class Location {
   @ApiProperty()
   lat: number;
 

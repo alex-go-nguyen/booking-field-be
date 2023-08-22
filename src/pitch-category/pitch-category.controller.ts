@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { Role } from 'src/common/decorators/roles.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { OrderEnum } from 'src/common/enums/order.enum';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { CreatePitchCategoryDto } from './dtos/create-pitch-category.dto';
@@ -41,7 +41,7 @@ export class PitchCategoryController {
 
   @ResponseMessage('Create pitch category successfully')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(RoleEnum.User)
+  @Roles(RoleEnum.Admin)
   @Post()
   async create(@Body() createPitchCategoryDto: CreatePitchCategoryDto) {
     const data = await this.pitchCategoryService.create(createPitchCategoryDto);
@@ -51,7 +51,7 @@ export class PitchCategoryController {
 
   @ResponseMessage('Update pitch category successfully')
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(RoleEnum.Admin)
+  @Roles(RoleEnum.Admin)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchCategoryDto: UpdatePitchCategoryDto) {
     const data = await this.pitchCategoryService.update(id, updatePitchCategoryDto);
@@ -61,7 +61,7 @@ export class PitchCategoryController {
 
   @HttpCode(204)
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(RoleEnum.Admin)
+  @Roles(RoleEnum.Admin)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.pitchCategoryService.softDelete(id);

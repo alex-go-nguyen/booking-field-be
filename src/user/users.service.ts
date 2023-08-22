@@ -18,7 +18,7 @@ export class UserService extends BaseService<User, unknown> {
   }
 
   async me(username: string) {
-    const user = await this.userRepository.findOne({ where: { username } });
+    const user = await this.userRepository.findOne({ where: { username }, relations: { venue: true } });
     user.password = undefined;
 
     return user;
@@ -28,6 +28,9 @@ export class UserService extends BaseService<User, unknown> {
     return this.userRepository.findOne({
       where: {
         username,
+      },
+      relations: {
+        venue: true,
       },
     });
   }

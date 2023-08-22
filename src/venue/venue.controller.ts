@@ -14,12 +14,15 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { In } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
-import { IVenueQuery } from './dtos/query-venue.dto';
+import { VenueQuery } from './dtos/query-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
 import { VenueSearchBody } from './interfaces/venue-search.interface';
@@ -36,7 +39,7 @@ export class VenueController {
   })
   @Get()
   @ResponseMessage('Get venues successfully')
-  async findAll(@Query() query: IVenueQuery) {
+  async findAll(@Query() query: VenueQuery) {
     const { location, page, limit, sorts } = query;
 
     const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
@@ -46,7 +49,7 @@ export class VenueController {
       'province',
     ]);
 
-    return this.venueService.findMany(
+    return this.venueService.findAndCount(
       { page, limit, sorts },
       {
         where: {
@@ -57,6 +60,32 @@ export class VenueController {
         },
       },
     );
+  }
+
+  @ApiOkResponse({
+    description: 'Get venue successfully!',
+    type: Venue,
+  })
+  @Get('user/:userId')
+  @ResponseMessage('Get venue successfully')
+  async findByUser(@Param('userId') userId: number) {
+    const data = await this.venueService.findOne({
+      where: {
+        user: {
+          _id: userId,
+        },
+      },
+      relations: {
+        pitches: {
+          pitchCategory: true,
+        },
+      },
+    });
+
+    if (!data) {
+      throw new NotFoundException('Venue not found');
+    }
+    return { data };
   }
 
   @ApiOkResponse({
@@ -88,7 +117,8 @@ export class VenueController {
     description: 'Create Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(RoleEnum.Admin)
   @Post()
   @ResponseMessage('Create Venue successfully')
   async create(@Body() createVenueDto: CreateVenueDto) {
@@ -111,7 +141,8 @@ export class VenueController {
     description: 'Update Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(RoleEnum.Owner)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
     const data = await this.venueService.update(id, updateVenueDto);
@@ -120,7 +151,8 @@ export class VenueController {
   }
 
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(RoleEnum.Admin)
   @Delete(':id')
   delete(@Param('id') id: number) {
     this.venueService.softDelete(id);

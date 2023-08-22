@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
 import {} from '../enums/order.enum';
 
-export class IPagination {
+export class Pagination {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()

@@ -1,12 +1,12 @@
 import { NotFoundException } from '@nestjs/common';
 import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
-import { IBaseQuery } from '../dtos/query.dto';
+import { BaseQuery } from '../dtos/query.dto';
 import { Base } from '../entities/base.entity';
 
 export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
   constructor(protected repo: Repository<Entity>) {}
 
-  async findMany(query?: IBaseQuery, options?: FindManyOptions<Entity>) {
+  async findAndCount(query?: BaseQuery, options?: FindManyOptions<Entity>) {
     const { limit, page, sorts } = query;
 
     const take = limit || 0;

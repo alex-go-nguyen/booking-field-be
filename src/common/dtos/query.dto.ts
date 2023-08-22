@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString } from 'class-validator';
-import { IPagination } from './pagination.dto';
-import { ISortQuery } from './sort.dto';
+import { Pagination } from './pagination.dto';
+import { SortQuery } from './sort.dto';
 
-export class IBaseQuery extends IPagination {
+export class BaseQuery extends Pagination {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -12,5 +12,5 @@ export class IBaseQuery extends IPagination {
   @ApiPropertyOptional()
   @IsOptional()
   @IsArray()
-  sorts?: ISortQuery[];
+  sorts?: SortQuery[];
 }
