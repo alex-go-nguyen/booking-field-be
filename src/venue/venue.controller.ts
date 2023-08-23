@@ -23,6 +23,7 @@ import { SearchService } from 'src/search/search.service';
 import { In } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
+import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
 import { VenueSearchBody } from './interfaces/venue-search.interface';
@@ -60,6 +61,25 @@ export class VenueController {
         },
       },
     );
+  }
+
+  @ApiOkResponse({
+    description: 'Searc venues successfully!',
+    type: Venue,
+  })
+  @Get('search')
+  @ResponseMessage('Get venue successfully')
+  async searchVenues(@Query() query: SearchListVenueQuery) {
+    const { location } = query;
+
+    const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
+      'name',
+      'description',
+      'district',
+      'province',
+    ]);
+
+    return this.venueService.searchVenues(query, ids);
   }
 
   @ApiOkResponse({
