@@ -4,6 +4,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { dateToTimeFloat } from 'src/common/utils';
 import { PitchService } from 'src/pitch/pitch.service';
@@ -70,6 +71,26 @@ export class BookingController {
     return { data };
   }
 
+  @ResponseMessage('Get user bookings successfully')
+  @Get('user')
+  getUserBookings(@CurrentUser('_id') id: number, @Query() query: BaseQuery) {
+    console.log(id);
+    return this.bookingService.findAndCount(query, {
+      where: {
+        user: {
+          _id: id,
+        },
+      },
+      relations: {
+        pitch: {
+          pitchCategory: true,
+          venue: true,
+        },
+        rating: true,
+      },
+    });
+  }
+
   @ResponseMessage('Get booking successfully')
   @Get(':id')
   async findOne(@Param('id') id: number) {
@@ -88,25 +109,6 @@ export class BookingController {
     });
 
     return { data };
-  }
-
-  @ResponseMessage('Get user bookings successfully')
-  @Get('user')
-  getUserBookings(@CurrentUser('_id') id: number, @Query() query: BookingQuery) {
-    return this.bookingService.findAndCount(query, {
-      where: {
-        user: {
-          _id: id,
-        },
-      },
-      relations: {
-        pitch: {
-          pitchCategory: true,
-          venue: true,
-        },
-        rating: true,
-      },
-    });
   }
 
   @ResponseMessage('Create booking successfully')
