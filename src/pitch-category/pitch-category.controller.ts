@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { BaseQuery } from 'src/common/dtos/query.dto';
 import { OrderEnum } from 'src/common/enums/order.enum';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { CreatePitchCategoryDto } from './dtos/create-pitch-category.dto';
@@ -17,14 +18,8 @@ export class PitchCategoryController {
 
   @ResponseMessage('Get pitch categories successfully')
   @Get()
-  async findAll() {
-    const data = await this.pitchCategoryService.findAll({
-      order: {
-        _id: OrderEnum.Asc,
-      },
-    });
-
-    return { data };
+  findAll(@Query() query: BaseQuery) {
+    return this.pitchCategoryService.findAndCount(query);
   }
 
   @ResponseMessage('Get pitch category successfully')
