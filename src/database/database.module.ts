@@ -15,7 +15,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
               rejectUnauthorized: false,
             },
             autoLoadEntities: true,
-            synchronize: false,
+            synchronize: true,
             logging: true,
             migrationsRun: false,
             migrations: ['dist/src/database/migrations/**/*{.ts,.js}'],

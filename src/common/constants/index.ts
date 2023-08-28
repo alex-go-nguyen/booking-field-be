@@ -33,4 +33,8 @@ export const TABLES = {
   booking: 'booking',
   pitchCategory: 'pitch-category',
   rating: 'rating',
+  tournament: 'tournament',
+  athlete: 'athlete',
+  match: 'match',
+  team: 'team',
 };
