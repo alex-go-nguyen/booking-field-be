@@ -33,4 +33,5 @@ export const TABLES = {
   booking: 'booking',
   pitchCategory: 'pitch-category',
   rating: 'rating',
+  forgottenPassword: 'forgotten-password',
 };

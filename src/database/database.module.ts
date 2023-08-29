@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         if (['staging', 'production'].includes(configService.get('NODE_ENV'))) {

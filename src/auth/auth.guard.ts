@@ -20,7 +20,11 @@ export class JwtAuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET_KEY,
       });
 
-      const user = await this.userService.findById(payload.sub);
+      const user = await this.userService.findOne({
+        where: {
+          _id: payload.sub,
+        },
+      });
 
       user.password = undefined;
       // 💡 We're assigning the payload to the request object here

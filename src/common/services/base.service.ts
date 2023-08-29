@@ -43,14 +43,6 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.find(options);
   }
 
-  findById(_id: number) {
-    return this.repo.findOne({
-      where: {
-        _id,
-      } as FindOptionsWhere<Entity>,
-    });
-  }
-
   findOne(options: FindOneOptions<Entity>) {
     return this.repo.findOne(options);
   }
@@ -61,7 +53,7 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.save(newData);
   }
 
-  async update(_id: number, data: DeepPartial<Dto>) {
+  async update(_id: number, data: DeepPartial<Entity>) {
     const existData = await this.findOne({
       where: {
         _id,

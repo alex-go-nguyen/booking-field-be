@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
@@ -6,7 +6,8 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { UpdateUserInfoDto } from './dtos/update-info-user.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
+import { UpdateUserDto } from './dtos/update-info-user.dto';
 import User from './entities/user.entity';
 import { CurrentUser } from './user.decorator';
 import { UserService } from './users.service';
@@ -58,13 +59,25 @@ export class UserController {
   }
 
   @ApiOkResponse({
+    description: 'Update password successfully!',
+    type: User,
+  })
+  @ResponseMessage('Update password successfully')
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser('_id') userId: number) {
+    const data = await this.userService.changePassword(userId, changePasswordDto);
+    return { data };
+  }
+
+  @ApiOkResponse({
     description: 'Update profile successfully!',
     type: User,
   })
   @ResponseMessage('Update profile successfully!')
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserInfoDto) {
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     const data = await this.userService.update(id, updateUserDto);
     return { data };
   }
