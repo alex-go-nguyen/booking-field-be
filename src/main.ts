@@ -2,6 +2,7 @@ import { Logger, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app.module';
@@ -18,6 +19,18 @@ const validationPipeOptions: ValidationPipeOptions = {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: { origin: '*' } });
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
+
+  Sentry.init({
+    dsn: configService.get<string>('SENTRY_DNS'),
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({
+        tracing: true,
+      }),
+    ],
+    // Performance Monitoring
+    tracesSampleRate: 1.0, // Capture 100% of the transactions, reduce in production!,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Booking Football Pitches')
