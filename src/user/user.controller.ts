@@ -4,10 +4,11 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
+import { AnalystUserQuery } from './dtos/analyst-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { UpdateUserDto } from './dtos/update-info-user.dto';
+import { UserQuery } from './dtos/user-query.dto';
 import User from './entities/user.entity';
 import { CurrentUser } from './user.decorator';
 import { UserService } from './users.service';
@@ -25,8 +26,20 @@ export class UserController {
   @Roles(RoleEnum.Admin)
   @ResponseMessage('Get list users successfully')
   @Get()
-  async findAll(@Query() query: BaseQuery) {
-    const data = await this.userService.findAndCount(query);
+  findAll(@Query() query: UserQuery) {
+    const { role } = query;
+
+    return this.userService.findAndCount(query, {
+      where: {
+        role,
+      },
+    });
+  }
+
+  @ResponseMessage('Get analyst users successfully')
+  @Get('analyst')
+  async analystByMonth(@Query() query: AnalystUserQuery) {
+    const data = await this.userService.analystUserSignIn(query);
 
     return { data };
   }

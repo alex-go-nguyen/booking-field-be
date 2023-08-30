@@ -5,6 +5,7 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 import { BaseService } from 'src/common/services/base.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Repository } from 'typeorm';
+import { AnalystUserQuery } from './dtos/analyst-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import User from './entities/user.entity';
@@ -99,5 +100,22 @@ export class UserService extends BaseService<User, CreateUserDto> {
     const result = await this.repo.save(updatedData);
 
     return result;
+  }
+
+  analystUserSignIn(query: AnalystUserQuery) {
+    const { year, role } = query;
+    const qb = this.userRepository
+      .createQueryBuilder('u')
+      .select("TO_CHAR(DATE_TRUNC('MONTH', u.createdAt), 'mm/dd/yyyy')", 'month')
+      .addSelect('COUNT(*)::int', 'total')
+      .where("DATE_PART('YEAR', u.createdAt) = :year", { year });
+
+    if (role) {
+      qb.andWhere('u.role = :role', { role });
+    }
+
+    qb.groupBy("DATE_TRUNC('MONTH', u.createdAt)");
+
+    return qb.getRawMany();
   }
 }
