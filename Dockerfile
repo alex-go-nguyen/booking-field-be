@@ -1,7 +1,7 @@
 FROM node:18-alpine
-WORKDIR /booking-pitch
+WORKDIR /app
 COPY . .
-RUN npm install
+RUN yarn
 # Development
 CMD ["npm", "run", "start:dev"]
 
