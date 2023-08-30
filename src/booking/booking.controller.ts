@@ -74,7 +74,6 @@ export class BookingController {
   @ResponseMessage('Get user bookings successfully')
   @Get('user')
   getUserBookings(@CurrentUser('_id') id: number, @Query() query: BaseQuery) {
-    console.log(id);
     return this.bookingService.findAndCount(query, {
       where: {
         user: {
