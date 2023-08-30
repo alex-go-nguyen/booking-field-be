@@ -39,7 +39,7 @@ export class UserService extends BaseService<User, CreateUserDto> {
   }
 
   async create(createUserInput: CreateUserDto) {
-    const existUser = await this.findByUsername(createUserInput.username);
+    const existUser = await this.findOne({ where: { username: createUserInput.username } });
     if (existUser) {
       throw new ConflictException('This username is already registered');
     }

@@ -47,11 +47,11 @@ export class VenueService extends BaseService<Venue, unknown> {
 
     const mainQb2 = this.pitchRepository
       .createQueryBuilder('p')
-      .select('p.venueId', 'venueId')
+      .select('p."venueId"', 'venueId')
       .addSelect('AVG(rb.rate)::int', 'averageRate')
       .addSelect('COUNT(rb.rate)::int', 'totalReview')
-      .leftJoin(`(${subQb2})`, 'rb', 'rb.pitchId = p.id')
-      .groupBy('p.venueId')
+      .leftJoin(`(${subQb2})`, 'rb', 'rb."pitchId" = p.id')
+      .groupBy('p."venueId"')
       .getQuery();
 
     const mainQb = this.venueRepository
@@ -60,7 +60,7 @@ export class VenueService extends BaseService<Venue, unknown> {
       .addSelect('vp.*')
       .addSelect('pr.*')
       .leftJoin(`(${subQb})`, 'vp', 'v.id = vp.id')
-      .leftJoin(`(${mainQb2})`, 'pr', 'pr.venueId = v.id')
+      .leftJoin(`(${mainQb2})`, 'pr', 'pr."venueId" = v.id')
       .setParameters({ maxPrice, minPrice, pitchCategoryId: pitchCategory, ids: venueIds })
       .where('vp.id notnull');
 

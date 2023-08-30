@@ -5,7 +5,7 @@ import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { Venue } from 'src/venue/entities/venue.entity';
-import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 @Entity(TABLES.user)
 export default class User extends Base {
@@ -39,7 +39,6 @@ export default class User extends Base {
   role: RoleEnum;
 
   @OneToOne(() => Venue, (venue) => venue.user, { nullable: true })
-  @JoinColumn()
   venue: Venue;
 
   @OneToMany(() => Booking, (booking) => booking.user)

@@ -20,7 +20,7 @@ export class BookingService extends BaseService<Booking, unknown> {
       .addSelect('SUM(b.totalPrice)::int', 'total')
       .leftJoin(Pitch, 'p', 'b.pitchId = p.id')
       .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
-      .andWhere('p.venueId = :venueId', { venueId })
+      .andWhere('p."venueId" = :venueId', { venueId })
       .groupBy("DATE_TRUNC('DAY', b.createdAt)");
 
     return qb.getRawMany();
@@ -33,9 +33,9 @@ export class BookingService extends BaseService<Booking, unknown> {
       .addSelect('pc.name', 'category')
       .addSelect('COUNT(*)::int', 'total')
       .leftJoin(Pitch, 'p', 'b.pitchId = p.id')
-      .leftJoin(PitchCategory, 'pc', 'p.pitchCategoryId = pc.id')
+      .leftJoin(PitchCategory, 'pc', 'p."pitchCategoryId" = pc.id')
       .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
-      .andWhere('p.venueId = :venueId', { venueId })
+      .andWhere('p."venueId" = :venueId', { venueId })
       .groupBy('pc.name')
       .addGroupBy('p.pitchCategoryId');
 

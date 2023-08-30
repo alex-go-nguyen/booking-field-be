@@ -146,7 +146,6 @@ export class VenueController {
   @Post()
   @ResponseMessage('Create Venue successfully')
   async create(@Body() createVenueDto: CreateVenueDto) {
-    const { user } = createVenueDto;
     const data = await this.venueService.create(createVenueDto);
 
     const { id, name, description, district, province } = data;
@@ -157,8 +156,6 @@ export class VenueController {
       province,
       district,
     });
-
-    await this.userService.update(user, { venue: data });
 
     return { data };
   }

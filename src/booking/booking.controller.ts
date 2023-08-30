@@ -26,6 +26,7 @@ export class BookingController {
   @Get()
   findAll(@Query() query: BookingQuery) {
     const { pitchId, venueId, date } = query;
+
     return this.bookingService.findAndCount(query, {
       where: {
         ...(venueId && {
@@ -73,6 +74,7 @@ export class BookingController {
 
   @ResponseMessage('Get user bookings successfully')
   @Get('user')
+  @UseGuards(JwtAuthGuard)
   getUserBookings(@CurrentUser('id') id: number, @Query() query: BaseQuery) {
     return this.bookingService.findAndCount(query, {
       where: {
@@ -121,6 +123,8 @@ export class BookingController {
         id: pitchId,
       },
     });
+
+    console.log(startTime, endTime);
 
     const totalPrice = pitch.price * (dateToTimeFloat(new Date(endTime)) - dateToTimeFloat(new Date(startTime)));
 
