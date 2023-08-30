@@ -34,8 +34,8 @@ export class PitchCategoryController {
   }
 
   @ResponseMessage('Create pitch category successfully')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Post()
   async create(@Body() createPitchCategoryDto: CreatePitchCategoryDto) {
     const data = await this.pitchCategoryService.create(createPitchCategoryDto);
@@ -44,8 +44,8 @@ export class PitchCategoryController {
   }
 
   @ResponseMessage('Update pitch category successfully')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchCategoryDto: UpdatePitchCategoryDto) {
     const data = await this.pitchCategoryService.update(id, updatePitchCategoryDto);
@@ -54,8 +54,8 @@ export class PitchCategoryController {
   }
 
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.pitchCategoryService.softDelete(id);
