@@ -26,7 +26,7 @@ export class PitchCategoryController {
   async findOne(@Param('id') id: number) {
     const data = await this.pitchCategoryService.findOne({
       where: {
-        _id: id,
+        id,
       },
     });
 

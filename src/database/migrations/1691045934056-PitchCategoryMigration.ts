@@ -1,4 +1,4 @@
-import { TABLES } from 'src/common/constants';
+import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
 export class PitchCategoryMigration1691045934056 implements MigrationInterface {
@@ -7,12 +7,6 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
       new Table({
         name: TABLES.pitchCategory,
         columns: [
-          {
-            name: '_id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-          },
           {
             name: 'name',
             type: 'varchar',
@@ -25,32 +19,10 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
             name: 'thumbnail',
             type: 'varchar',
           },
-          {
-            name: 'createdAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'updatedAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deletedAt',
-            type: 'timestamp',
-            isNullable: true,
-          },
+          ...BASE_COLUMNS,
         ],
       }),
       true,
-    );
-
-    await queryRunner.createIndex(
-      TABLES.pitchCategory,
-      new TableIndex({
-        name: 'pitchName-idx',
-        columnNames: ['name'],
-      }),
     );
 
     await queryRunner.addColumn(
@@ -65,14 +37,18 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
       TABLES.pitch,
       new TableForeignKey({
         columnNames: ['pitchCategory_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.pitchCategory,
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(TABLES.pitchCategory, 'name-idx');
+    const tablePitch = await queryRunner.getTable(TABLES.pitch);
+    const pitchCategoryFk = tablePitch.foreignKeys.find((fk) => fk.columnNames.indexOf('pitchCategory_id') !== -1);
+
+    await queryRunner.dropForeignKey(TABLES.pitch, pitchCategoryFk);
+
     await queryRunner.dropTable(TABLES.pitchCategory);
   }
 }

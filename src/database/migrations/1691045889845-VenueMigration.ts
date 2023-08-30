@@ -85,7 +85,7 @@ export class VenueMigration1691045889845 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(TABLES.venue, 'name-idx');
+    await queryRunner.dropIndex(TABLES.venue, 'venueName-idx');
     await queryRunner.dropIndex(TABLES.venue, 'address-idx');
     await queryRunner.dropIndex(TABLES.venue, 'province-idx');
     await queryRunner.dropIndex(TABLES.venue, 'district-idx');

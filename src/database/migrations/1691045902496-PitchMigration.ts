@@ -1,4 +1,4 @@
-import { TABLES } from 'src/common/constants';
+import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
 
 export class PitchMigration1691045902496 implements MigrationInterface {
@@ -8,12 +8,6 @@ export class PitchMigration1691045902496 implements MigrationInterface {
         name: TABLES.pitch,
         columns: [
           {
-            name: '_id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-          },
-          {
             name: 'no',
             type: 'int',
           },
@@ -21,21 +15,7 @@ export class PitchMigration1691045902496 implements MigrationInterface {
             name: 'price',
             type: 'int',
           },
-          {
-            name: 'createdAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'updatedAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deletedAt',
-            type: 'timestamp',
-            isNullable: true,
-          },
+          ...BASE_COLUMNS,
         ],
       }),
       true,
@@ -53,7 +33,7 @@ export class PitchMigration1691045902496 implements MigrationInterface {
       TABLES.pitch,
       new TableForeignKey({
         columnNames: ['venue_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.venue,
       }),
     );
@@ -62,10 +42,8 @@ export class PitchMigration1691045902496 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable(TABLES.pitch);
     const venueForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('venue_id') !== -1);
-    const pitchCategoryForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('pitchCategory_id') !== -1);
-    const bookingForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('booking_id') !== -1);
 
-    await queryRunner.dropForeignKeys(TABLES.pitch, [venueForeignKey, pitchCategoryForeignKey, bookingForeignKey]);
+    await queryRunner.dropForeignKeys(TABLES.pitch, [venueForeignKey]);
     await queryRunner.dropTable(TABLES.pitch);
   }
 }

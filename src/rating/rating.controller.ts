@@ -41,7 +41,7 @@ export class RatingController {
           booking: {
             pitch: {
               venue: {
-                _id: venueId,
+                id: venueId,
               },
             },
           },
@@ -68,7 +68,7 @@ export class RatingController {
   async findOne(@Param('id') id: number) {
     const data = await this.ratingService.findOne({
       where: {
-        _id: id,
+        id,
       },
     });
 

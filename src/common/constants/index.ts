@@ -4,7 +4,7 @@ export const ROLES_KEY = 'role';
 
 export const BASE_COLUMNS = [
   {
-    name: '_id',
+    name: 'id',
     type: 'int',
     isPrimary: true,
     isGenerated: true,

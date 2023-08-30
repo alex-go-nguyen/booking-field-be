@@ -25,7 +25,7 @@ export class CloudinaryController {
   @Post('file')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(@UploadedFile() file: Express.Multer.File, @CurrentUser('_id') userId: number) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File, @CurrentUser('id') userId: number) {
     const data = await this.cloudinaryService.uploadImage({ userId, file });
 
     return { data };
@@ -35,7 +35,7 @@ export class CloudinaryController {
   @ResponseMessage('Upload files successfully!')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10))
-  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @CurrentUser('_id') userId: number) {
+  async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @CurrentUser('id') userId: number) {
     const data = await this.cloudinaryService.uploadImages({
       userId,
       files,

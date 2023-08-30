@@ -38,15 +38,14 @@ export default class User extends Base {
   })
   role: RoleEnum;
 
-  @OneToOne(() => Venue, (venue) => venue.user)
-  @JoinColumn()
+  @OneToOne(() => Venue, (venue) => venue.user, { nullable: true })
+  @JoinColumn({ name: 'venue_id' })
   venue: Venue;
 
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
 
   @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }

@@ -1,4 +1,4 @@
-import { TABLES } from 'src/common/constants';
+import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
 
 export class RatingMigration1691046028952 implements MigrationInterface {
@@ -8,12 +8,6 @@ export class RatingMigration1691046028952 implements MigrationInterface {
         name: TABLES.rating,
         columns: [
           {
-            name: '_id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-          },
-          {
             name: 'content',
             type: 'varchar',
           },
@@ -21,21 +15,7 @@ export class RatingMigration1691046028952 implements MigrationInterface {
             name: 'rate',
             type: 'float',
           },
-          {
-            name: 'createdAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'updatedAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deletedAt',
-            type: 'timestamp',
-            isNullable: true,
-          },
+          ...BASE_COLUMNS,
         ],
       }),
       true,
@@ -52,7 +32,7 @@ export class RatingMigration1691046028952 implements MigrationInterface {
       TABLES.rating,
       new TableForeignKey({
         columnNames: ['booking_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.booking,
       }),
     );
@@ -62,6 +42,6 @@ export class RatingMigration1691046028952 implements MigrationInterface {
     const table = await queryRunner.getTable(TABLES.rating);
     const bookingForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('booking_id') !== -1);
 
-    queryRunner.dropForeignKey(TABLES.rating, bookingForeignKey);
+    await queryRunner.dropForeignKey(TABLES.rating, bookingForeignKey);
   }
 }

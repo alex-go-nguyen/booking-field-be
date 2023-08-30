@@ -53,10 +53,10 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.save(newData);
   }
 
-  async update(_id: number, data: DeepPartial<Entity>) {
+  async update(id: number, data: DeepPartial<Entity>) {
     const existData = await this.findOne({
       where: {
-        _id,
+        id,
       } as FindOptionsWhere<Entity>,
     });
 
@@ -69,10 +69,10 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.save(updatedData);
   }
 
-  async softDelete(_id: number) {
+  async softDelete(id: number) {
     const existData = await this.findOne({
       where: {
-        _id,
+        id,
       } as FindOptionsWhere<Entity>,
     });
 
@@ -80,6 +80,6 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
       throw new NotFoundException('Resource not found!');
     }
 
-    return this.repo.softDelete(_id);
+    return this.repo.softDelete(id);
   }
 }

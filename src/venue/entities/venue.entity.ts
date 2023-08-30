@@ -43,7 +43,7 @@ export class Venue extends Base {
   pitches: Pitch[];
 
   @OneToOne(() => User, (user) => user.venue)
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @BeforeInsert()

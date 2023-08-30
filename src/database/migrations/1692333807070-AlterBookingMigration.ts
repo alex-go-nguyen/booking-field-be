@@ -6,13 +6,13 @@ export class AlterBookingMigration1692333807070 implements MigrationInterface {
     await queryRunner.addColumn(
       TABLES.booking,
       new TableColumn({
-        name: 'total_price',
+        name: 'totalPrice',
         type: 'int',
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn(TABLES.booking, 'total_price');
+    await queryRunner.dropColumn(TABLES.booking, 'totalPrice');
   }
 }

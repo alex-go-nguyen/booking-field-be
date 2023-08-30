@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsIn, IsInt, IsString } from 'class-validator';
 import { Location } from '../interfaces/location.interface';
 
 export class CreateVenueDto {
@@ -29,4 +29,8 @@ export class CreateVenueDto {
   @ApiProperty()
   @IsString()
   closeAt: string;
+
+  @ApiProperty()
+  @IsInt()
+  user: number;
 }

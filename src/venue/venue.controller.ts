@@ -20,6 +20,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
+import { UserService } from 'src/user/users.service';
 import { In } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
@@ -32,7 +33,11 @@ import { VenueService } from './venue.service';
 @ApiTags('Venue')
 @Controller('venues')
 export class VenueController {
-  constructor(private readonly venueService: VenueService, private readonly searchService: SearchService) {}
+  constructor(
+    private readonly venueService: VenueService,
+    private readonly searchService: SearchService,
+    private readonly userService: UserService,
+  ) {}
 
   @ApiResponse({
     description: 'Get venues successfully',
@@ -54,7 +59,7 @@ export class VenueController {
       { page, limit, sorts },
       {
         where: {
-          _id: In(ids),
+          id: In(ids),
         },
         relations: {
           pitches: true,
@@ -92,7 +97,7 @@ export class VenueController {
     const data = await this.venueService.findOne({
       where: {
         user: {
-          _id: userId,
+          id: userId,
         },
       },
       relations: {
@@ -144,14 +149,16 @@ export class VenueController {
   async create(@Body() createVenueDto: CreateVenueDto) {
     const data = await this.venueService.create(createVenueDto);
 
-    const { _id, name, description, district, province } = data;
+    const { id, name, description, district, province, user } = data;
     this.searchService.index<VenueSearchBody>('venues', {
-      id: _id,
+      id,
       name,
       description,
       province,
       district,
     });
+
+    await this.userService.update(user.id, { venue: data });
 
     return { data };
   }
@@ -162,7 +169,7 @@ export class VenueController {
     type: BaseResponse<Venue>,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(RoleEnum.Owner)
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
     const data = await this.venueService.update(id, updateVenueDto);

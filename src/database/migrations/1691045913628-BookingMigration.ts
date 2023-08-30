@@ -1,4 +1,4 @@
-import { TABLES } from 'src/common/constants';
+import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
 
 export class BookingMigration1691045913628 implements MigrationInterface {
@@ -8,12 +8,6 @@ export class BookingMigration1691045913628 implements MigrationInterface {
         name: TABLES.booking,
         columns: [
           {
-            name: '_id',
-            type: 'int',
-            isPrimary: true,
-            isGenerated: true,
-          },
-          {
             name: 'startTime',
             type: 'timestamptz',
           },
@@ -21,21 +15,7 @@ export class BookingMigration1691045913628 implements MigrationInterface {
             name: 'endTime',
             type: 'timestamptz',
           },
-          {
-            name: 'createdAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'updatedAt',
-            type: 'timestamp',
-            default: 'now()',
-          },
-          {
-            name: 'deletedAt',
-            type: 'timestamp',
-            isNullable: true,
-          },
+          ...BASE_COLUMNS,
         ],
       }),
       true,
@@ -56,7 +36,7 @@ export class BookingMigration1691045913628 implements MigrationInterface {
       TABLES.booking,
       new TableForeignKey({
         columnNames: ['pitch_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.pitch,
       }),
     );
@@ -65,7 +45,7 @@ export class BookingMigration1691045913628 implements MigrationInterface {
       TABLES.booking,
       new TableForeignKey({
         columnNames: ['user_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.user,
       }),
     );
@@ -75,9 +55,8 @@ export class BookingMigration1691045913628 implements MigrationInterface {
     const table = await queryRunner.getTable(TABLES.booking);
     const userForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('user_id') !== -1);
     const pitchForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('pitch_id') !== -1);
-    const ratingForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('rating_id') !== -1);
 
-    queryRunner.dropForeignKeys(TABLES.booking, [userForeignKey, pitchForeignKey, ratingForeignKey]);
-    queryRunner.dropTable(TABLES.booking);
+    await queryRunner.dropForeignKeys(TABLES.booking, [userForeignKey, pitchForeignKey]);
+    await queryRunner.dropTable(TABLES.booking);
   }
 }

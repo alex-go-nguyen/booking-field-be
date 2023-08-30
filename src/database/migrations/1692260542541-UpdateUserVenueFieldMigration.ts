@@ -16,7 +16,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
       TABLES.user,
       new TableForeignKey({
         columnNames: ['venue_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.venue,
       }),
     );
@@ -33,7 +33,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
       TABLES.venue,
       new TableForeignKey({
         columnNames: ['user_id'],
-        referencedColumnNames: ['_id'],
+        referencedColumnNames: ['id'],
         referencedTableName: TABLES.user,
       }),
     );
@@ -46,7 +46,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
     const tableVenue = await queryRunner.getTable(TABLES.venue);
     const venueForeignKey = tableVenue.foreignKeys.find((fk) => fk.columnNames.indexOf('user_id') !== -1);
 
-    queryRunner.dropForeignKey(TABLES.user, userForeignKey);
-    queryRunner.dropForeignKey(TABLES.venue, venueForeignKey);
+    await queryRunner.dropForeignKey(TABLES.user, userForeignKey);
+    await queryRunner.dropForeignKey(TABLES.venue, venueForeignKey);
   }
 }
