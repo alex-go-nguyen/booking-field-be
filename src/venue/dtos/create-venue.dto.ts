@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 import { Location } from '../interfaces/location.interface';
 
 export class CreateVenueDto {

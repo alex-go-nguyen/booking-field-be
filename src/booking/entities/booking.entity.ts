@@ -26,5 +26,6 @@ export class Booking extends Base {
   user: User;
 
   @OneToOne(() => Rating, (rating) => rating.booking)
+  @JoinColumn()
   rating: Rating;
 }

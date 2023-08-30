@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -91,8 +90,8 @@ export class PitchController {
     type: Pitch,
   })
   @ResponseMessage('Create pitch successfully')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Post()
   create(@Body() createPitchDto: CreatePitchDto) {
     return this.pitchService.create(createPitchDto);
@@ -103,8 +102,8 @@ export class PitchController {
     type: Pitch,
   })
   @ResponseMessage('Update pitch successfully')
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchDto: UpdatePitchDto) {
     const data = await this.pitchService.update(id, updatePitchDto);
@@ -115,8 +114,8 @@ export class PitchController {
   @ApiOkResponse({
     description: 'Delete pitch successfully!',
   })
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {

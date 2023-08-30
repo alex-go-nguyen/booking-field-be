@@ -13,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -142,14 +141,15 @@ export class VenueController {
     description: 'Create Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Post()
   @ResponseMessage('Create Venue successfully')
   async create(@Body() createVenueDto: CreateVenueDto) {
+    const { user } = createVenueDto;
     const data = await this.venueService.create(createVenueDto);
 
-    const { id, name, description, district, province, user } = data;
+    const { id, name, description, district, province } = data;
     this.searchService.index<VenueSearchBody>('venues', {
       id,
       name,
@@ -158,7 +158,7 @@ export class VenueController {
       district,
     });
 
-    await this.userService.update(user.id, { venue: data });
+    await this.userService.update(user, { venue: data });
 
     return { data };
   }
@@ -168,8 +168,8 @@ export class VenueController {
     description: 'Update Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
     const data = await this.venueService.update(id, updateVenueDto);
@@ -178,8 +178,8 @@ export class VenueController {
   }
 
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     this.venueService.softDelete(id);

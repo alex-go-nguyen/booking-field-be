@@ -1,5 +1,5 @@
 import { BASE_COLUMNS, TABLES } from 'src/common/constants';
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
 
 export class PitchCategoryMigration1691045934056 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -28,7 +28,7 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
     await queryRunner.addColumn(
       TABLES.pitch,
       new TableColumn({
-        name: 'pitchCategory_id',
+        name: 'pitchCategoryId',
         type: 'int',
       }),
     );
@@ -36,7 +36,7 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
     await queryRunner.createForeignKey(
       TABLES.pitch,
       new TableForeignKey({
-        columnNames: ['pitchCategory_id'],
+        columnNames: ['pitchCategoryId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.pitchCategory,
       }),
@@ -45,7 +45,7 @@ export class PitchCategoryMigration1691045934056 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const tablePitch = await queryRunner.getTable(TABLES.pitch);
-    const pitchCategoryFk = tablePitch.foreignKeys.find((fk) => fk.columnNames.indexOf('pitchCategory_id') !== -1);
+    const pitchCategoryFk = tablePitch.foreignKeys.find((fk) => fk.columnNames.indexOf('pitchCategoryId') !== -1);
 
     await queryRunner.dropForeignKey(TABLES.pitch, pitchCategoryFk);
 

@@ -11,14 +11,14 @@ export class Pitch extends Base {
   no: number;
 
   @ManyToOne(() => PitchCategory, (pitchCategory) => pitchCategory.pitches)
-  @JoinColumn({ name: 'pitchCategory_id' })
+  @JoinColumn()
   pitchCategory: PitchCategory;
 
   @Column()
   price: number;
 
   @ManyToOne(() => Venue, (venue) => venue.pitches)
-  @JoinColumn({ name: 'venue_id' })
+  @JoinColumn()
   venue: Venue;
 
   @OneToMany(() => Booking, (booking) => booking.pitch)

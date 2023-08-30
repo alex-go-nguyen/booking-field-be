@@ -24,14 +24,14 @@ export class RatingMigration1691046028952 implements MigrationInterface {
     await queryRunner.addColumn(
       TABLES.rating,
       new TableColumn({
-        name: 'booking_id',
+        name: 'bookingId',
         type: 'int',
       }),
     );
     await queryRunner.createForeignKey(
       TABLES.rating,
       new TableForeignKey({
-        columnNames: ['booking_id'],
+        columnNames: ['bookingId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.booking,
       }),
@@ -40,7 +40,7 @@ export class RatingMigration1691046028952 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable(TABLES.rating);
-    const bookingForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('booking_id') !== -1);
+    const bookingForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('bookingId') !== -1);
 
     await queryRunner.dropForeignKey(TABLES.rating, bookingForeignKey);
   }

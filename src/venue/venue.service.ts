@@ -27,31 +27,31 @@ export class VenueService extends BaseService<Venue, unknown> {
       .createQueryBuilder('v')
       .select('v.id', 'id')
       .addSelect('p.price', 'price')
-      .leftJoin(Pitch, 'p', 'v.id = p.venue_id')
-      .leftJoin(Booking, 'b', 'p.id = b.pitch_id')
-      .leftJoin(Rating, 'r', 'r.booking_id = b.id')
+      .leftJoin(Pitch, 'p', 'v.id = p.venueId')
+      .leftJoin(Booking, 'b', 'p.id = b.pitchId')
+      .leftJoin(Rating, 'r', 'r.bookingId = b.id')
       .where('p.price > :minPrice')
       .andWhere('p.price < :maxPrice')
-      .andWhere('p.pitchCategory_id = :pitchCategory_id')
+      .andWhere('p.pitchCategoryId = :pitchCategoryId')
       .andWhere('v.id IN (:...ids)')
       .groupBy('v.id')
       .addGroupBy('p.price')
-      .addGroupBy('p.pitchCategory_id')
+      .addGroupBy('p.pitchCategoryId')
       .getQuery();
 
     const subQb2 = this.ratingRepository
       .createQueryBuilder('r')
       .select('*')
-      .leftJoin(Booking, 'b', 'b.id = r.booking_id')
+      .leftJoin(Booking, 'b', 'b.id = r.bookingId')
       .getQuery();
 
     const mainQb2 = this.pitchRepository
       .createQueryBuilder('p')
-      .select('p.venue_id', 'venue_id')
+      .select('p.venueId', 'venueId')
       .addSelect('AVG(rb.rate)::int', 'averageRate')
       .addSelect('COUNT(rb.rate)::int', 'totalReview')
-      .leftJoin(`(${subQb2})`, 'rb', 'rb.pitch_id = p.id')
-      .groupBy('p.venue_id')
+      .leftJoin(`(${subQb2})`, 'rb', 'rb.pitchId = p.id')
+      .groupBy('p.venueId')
       .getQuery();
 
     const mainQb = this.venueRepository
@@ -60,8 +60,8 @@ export class VenueService extends BaseService<Venue, unknown> {
       .addSelect('vp.*')
       .addSelect('pr.*')
       .leftJoin(`(${subQb})`, 'vp', 'v.id = vp.id')
-      .leftJoin(`(${mainQb2})`, 'pr', 'pr.venue_id = v.id')
-      .setParameters({ maxPrice, minPrice, pitchCategory_id: pitchCategory, ids: venueIds })
+      .leftJoin(`(${mainQb2})`, 'pr', 'pr.venueId = v.id')
+      .setParameters({ maxPrice, minPrice, pitchCategoryId: pitchCategory, ids: venueIds })
       .where('vp.id notnull');
 
     if (sorts) {

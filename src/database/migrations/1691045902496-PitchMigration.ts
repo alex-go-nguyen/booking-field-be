@@ -24,7 +24,7 @@ export class PitchMigration1691045902496 implements MigrationInterface {
     await queryRunner.addColumn(
       TABLES.pitch,
       new TableColumn({
-        name: 'venue_id',
+        name: 'venueId',
         type: 'int',
       }),
     );
@@ -32,7 +32,7 @@ export class PitchMigration1691045902496 implements MigrationInterface {
     await queryRunner.createForeignKey(
       TABLES.pitch,
       new TableForeignKey({
-        columnNames: ['venue_id'],
+        columnNames: ['venueId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.venue,
       }),
@@ -41,7 +41,7 @@ export class PitchMigration1691045902496 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable(TABLES.pitch);
-    const venueForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('venue_id') !== -1);
+    const venueForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('venueId') !== -1);
 
     await queryRunner.dropForeignKeys(TABLES.pitch, [venueForeignKey]);
     await queryRunner.dropTable(TABLES.pitch);

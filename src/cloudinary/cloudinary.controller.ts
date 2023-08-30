@@ -31,8 +31,8 @@ export class CloudinaryController {
     return { data };
   }
 
-  @Post('files')
   @ResponseMessage('Upload files successfully!')
+  @Post('files')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10))
   async uploadMultipleFiles(@UploadedFiles() files: Array<Express.Multer.File>, @CurrentUser('id') userId: number) {

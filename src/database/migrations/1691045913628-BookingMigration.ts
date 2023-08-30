@@ -23,11 +23,11 @@ export class BookingMigration1691045913628 implements MigrationInterface {
 
     await queryRunner.addColumns(TABLES.booking, [
       new TableColumn({
-        name: 'pitch_id',
+        name: 'pitchId',
         type: 'int',
       }),
       new TableColumn({
-        name: 'user_id',
+        name: 'userId',
         type: 'int',
       }),
     ]);
@@ -35,7 +35,7 @@ export class BookingMigration1691045913628 implements MigrationInterface {
     await queryRunner.createForeignKey(
       TABLES.booking,
       new TableForeignKey({
-        columnNames: ['pitch_id'],
+        columnNames: ['pitchId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.pitch,
       }),
@@ -44,7 +44,7 @@ export class BookingMigration1691045913628 implements MigrationInterface {
     await queryRunner.createForeignKey(
       TABLES.booking,
       new TableForeignKey({
-        columnNames: ['user_id'],
+        columnNames: ['userId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.user,
       }),
@@ -53,8 +53,8 @@ export class BookingMigration1691045913628 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable(TABLES.booking);
-    const userForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('user_id') !== -1);
-    const pitchForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('pitch_id') !== -1);
+    const userForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('userId') !== -1);
+    const pitchForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('pitchId') !== -1);
 
     await queryRunner.dropForeignKeys(TABLES.booking, [userForeignKey, pitchForeignKey]);
     await queryRunner.dropTable(TABLES.booking);

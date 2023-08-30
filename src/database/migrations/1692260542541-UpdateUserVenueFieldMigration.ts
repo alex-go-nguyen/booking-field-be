@@ -6,7 +6,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
     await queryRunner.addColumn(
       TABLES.user,
       new TableColumn({
-        name: 'venue_id',
+        name: 'venueId',
         type: 'int',
         isNullable: true,
       }),
@@ -15,7 +15,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
     await queryRunner.createForeignKey(
       TABLES.user,
       new TableForeignKey({
-        columnNames: ['venue_id'],
+        columnNames: ['venueId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.venue,
       }),
@@ -24,7 +24,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
     await queryRunner.addColumn(
       TABLES.venue,
       new TableColumn({
-        name: 'user_id',
+        name: 'userId',
         type: 'int',
       }),
     );
@@ -32,7 +32,7 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
     await queryRunner.createForeignKey(
       TABLES.venue,
       new TableForeignKey({
-        columnNames: ['user_id'],
+        columnNames: ['userId'],
         referencedColumnNames: ['id'],
         referencedTableName: TABLES.user,
       }),
@@ -41,10 +41,10 @@ export class UpdateUserVenueFieldMigration1692260542541 implements MigrationInte
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const tableUser = await queryRunner.getTable(TABLES.user);
-    const userForeignKey = tableUser.foreignKeys.find((fk) => fk.columnNames.indexOf('venue_id') !== -1);
+    const userForeignKey = tableUser.foreignKeys.find((fk) => fk.columnNames.indexOf('venueId') !== -1);
 
     const tableVenue = await queryRunner.getTable(TABLES.venue);
-    const venueForeignKey = tableVenue.foreignKeys.find((fk) => fk.columnNames.indexOf('user_id') !== -1);
+    const venueForeignKey = tableVenue.foreignKeys.find((fk) => fk.columnNames.indexOf('userId') !== -1);
 
     await queryRunner.dropForeignKey(TABLES.user, userForeignKey);
     await queryRunner.dropForeignKey(TABLES.venue, venueForeignKey);
