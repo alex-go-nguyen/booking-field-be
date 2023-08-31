@@ -26,7 +26,7 @@ export class AuthService {
     if (!isPasswordMatching) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: user._id, username: user.username };
+    const payload = { sub: user.id, username: user.username };
     const accessToken = this.jwtService.sign(payload);
     user.password = undefined;
     return {
@@ -36,7 +36,7 @@ export class AuthService {
   }
   async signUp(createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
-    const payload = { sub: user._id, username: user.username };
+    const payload = { sub: user.id, username: user.username };
     const accessToken = this.jwtService.sign(payload);
     user.password = undefined;
     return {
@@ -55,7 +55,7 @@ export class AuthService {
     });
 
     if (forgottenPassword && new Date().getTime() < forgottenPassword.expiredAt.getTime()) {
-      this.forgottenPasswordService.update(forgottenPassword._id, { expiredAt: new Date() });
+      this.forgottenPasswordService.update(forgottenPassword.id, { expiredAt: new Date() });
     }
 
     const resetToken = (Math.floor(Math.random() * 9000000) + 1000000).toString();

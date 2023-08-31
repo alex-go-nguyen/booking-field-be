@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -48,17 +47,17 @@ export class PitchController {
             }),
           ...(pitchCategoryId && {
             pitchCategory: {
-              _id: pitchCategoryId,
+              id: pitchCategoryId,
             },
           }),
           ...(location && {
             venue: {
-              _id: In(ids),
+              id: In(ids),
             },
           }),
           ...(venueId && {
             venue: {
-              _id: venueId,
+              id: venueId,
             },
           }),
         },
@@ -79,7 +78,7 @@ export class PitchController {
   async findOne(@Param('id') id: number) {
     const data = await this.pitchService.findOne({
       where: {
-        _id: id,
+        id,
       },
     });
 

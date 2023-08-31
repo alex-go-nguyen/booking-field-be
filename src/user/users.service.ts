@@ -39,8 +39,7 @@ export class UserService extends BaseService<User, CreateUserDto> {
   }
 
   async create(createUserInput: CreateUserDto) {
-    const existUser = await this.findByUsername(createUserInput.username);
-
+    const existUser = await this.findOne({ where: { username: createUserInput.username } });
     if (existUser) {
       throw new ConflictException('This username is already registered');
     }
@@ -65,7 +64,7 @@ export class UserService extends BaseService<User, CreateUserDto> {
 
     const user = await this.findOne({
       where: {
-        _id: userId,
+        id: userId,
       },
     });
 
@@ -75,7 +74,9 @@ export class UserService extends BaseService<User, CreateUserDto> {
       throw new BadRequestException('Invalid password');
     }
 
-    const updatedData = this.userRepository.create({ ...user, password: newPassword });
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedData = this.userRepository.create({ ...user, password: hashPassword });
 
     const result = await this.repo.save(updatedData);
 
@@ -95,7 +96,9 @@ export class UserService extends BaseService<User, CreateUserDto> {
       throw new NotFoundException('User not found');
     }
 
-    const updatedData = this.userRepository.create({ ...user, password: newPassword });
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedData = this.userRepository.create({ ...user, password: hashPassword });
 
     const result = await this.repo.save(updatedData);
 

@@ -26,18 +26,19 @@ export class BookingController {
   @Get()
   findAll(@Query() query: BookingQuery) {
     const { pitchId, venueId, date } = query;
+
     return this.bookingService.findAndCount(query, {
       where: {
         ...(venueId && {
           pitch: {
             venue: {
-              _id: venueId,
+              id: venueId,
             },
           },
         }),
         ...(pitchId && {
           pitch: {
-            _id: pitchId,
+            id: pitchId,
           },
         }),
         ...(date && { startTime: Raw((alias) => `DATE(${alias}) = DATE(:date)`, { date }) }),
@@ -73,11 +74,12 @@ export class BookingController {
 
   @ResponseMessage('Get user bookings successfully')
   @Get('user')
-  getUserBookings(@CurrentUser('_id') id: number, @Query() query: BaseQuery) {
+  @UseGuards(JwtAuthGuard)
+  getUserBookings(@CurrentUser('id') id: number, @Query() query: BaseQuery) {
     return this.bookingService.findAndCount(query, {
       where: {
         user: {
-          _id: id,
+          id,
         },
       },
       relations: {
@@ -95,7 +97,7 @@ export class BookingController {
   async findOne(@Param('id') id: number) {
     const data = await this.bookingService.findOne({
       where: {
-        _id: id,
+        id,
       },
       relations: {
         user: true,
@@ -113,14 +115,16 @@ export class BookingController {
   @ResponseMessage('Create booking successfully')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createBookingDto: CreateBookingDto, @CurrentUser('_id') userId: number) {
+  async create(@Body() createBookingDto: CreateBookingDto, @CurrentUser('id') userId: number) {
     const { pitch: pitchId, startTime, endTime } = createBookingDto;
 
     const pitch = await this.pitchService.findOne({
       where: {
-        _id: pitchId,
+        id: pitchId,
       },
     });
+
+    console.log(startTime, endTime);
 
     const totalPrice = pitch.price * (dateToTimeFloat(new Date(endTime)) - dateToTimeFloat(new Date(startTime)));
 

@@ -53,7 +53,7 @@ export class UserController {
   async findOne(@Param('id') id: number) {
     const data = await this.userService.findOne({
       where: {
-        _id: id,
+        id,
       },
     });
 
@@ -78,7 +78,7 @@ export class UserController {
   @ResponseMessage('Update password successfully')
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser('_id') userId: number) {
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser('id') userId: number) {
     const data = await this.userService.changePassword(userId, changePasswordDto);
     return { data };
   }

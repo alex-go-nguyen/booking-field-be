@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -26,7 +25,7 @@ export class PitchCategoryController {
   async findOne(@Param('id') id: number) {
     const data = await this.pitchCategoryService.findOne({
       where: {
-        _id: id,
+        id,
       },
     });
 

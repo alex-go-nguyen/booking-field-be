@@ -22,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
 
       const user = await this.userService.findOne({
         where: {
-          _id: payload.sub,
+          id: payload.sub,
         },
       });
 

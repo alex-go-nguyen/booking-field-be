@@ -18,9 +18,9 @@ export class BookingService extends BaseService<Booking, unknown> {
       .createQueryBuilder('b')
       .select("TO_CHAR(DATE_TRUNC('DAY', b.createdAt), 'mm/dd/yyyy')", 'day')
       .addSelect('SUM(b.totalPrice)::int', 'total')
-      .leftJoin(Pitch, 'p', 'b.pitch_id = p._id')
+      .leftJoin(Pitch, 'p', 'b.pitchId = p.id')
       .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
-      .andWhere('p.venue_id = :venueId', { venueId })
+      .andWhere('p."venueId" = :venueId', { venueId })
       .groupBy("DATE_TRUNC('DAY', b.createdAt)");
 
     return qb.getRawMany();
@@ -29,15 +29,15 @@ export class BookingService extends BaseService<Booking, unknown> {
   analystCategory({ year, venueId }: BookingAnalystQuery) {
     const qb = this.bookingRepository
       .createQueryBuilder('b')
-      .select('p.pitchCategory_id', 'pitchCategory_id')
+      .select('p.pitchCategoryId', 'pitchCategoryId')
       .addSelect('pc.name', 'category')
       .addSelect('COUNT(*)::int', 'total')
-      .leftJoin(Pitch, 'p', 'b.pitch_id = p._id')
-      .leftJoin(PitchCategory, 'pc', 'p.pitchCategory_id = pc._id')
+      .leftJoin(Pitch, 'p', 'b.pitchId = p.id')
+      .leftJoin(PitchCategory, 'pc', 'p."pitchCategoryId" = pc.id')
       .where("DATE_PART('YEAR', b.createdAt) = :year", { year })
-      .andWhere('p.venue_id = :venueId', { venueId })
+      .andWhere('p."venueId" = :venueId', { venueId })
       .groupBy('pc.name')
-      .addGroupBy('p.pitchCategory_id');
+      .addGroupBy('p.pitchCategoryId');
 
     return qb.getRawMany();
   }
