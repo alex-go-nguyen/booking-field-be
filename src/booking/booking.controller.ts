@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
@@ -10,6 +10,7 @@ import { dateToTimeFloat } from 'src/common/utils';
 import { PitchService } from 'src/pitch/pitch.service';
 import { CurrentUser } from 'src/user/user.decorator';
 import { Raw } from 'typeorm';
+import { BookingGateway } from './booking.gateway';
 import { BookingService } from './booking.service';
 import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
 import { BookingQuery } from './dtos/booking-query.dto';
@@ -19,13 +20,19 @@ import { UpdateBookingDto } from './dtos/update-booking.dto';
 @ApiTags('Booking')
 @Controller('bookings')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService, private readonly pitchService: PitchService) {}
+  constructor(
+    private readonly bookingService: BookingService,
+    private readonly pitchService: PitchService,
+    @Inject(BookingGateway) private readonly bookingGateway: BookingGateway,
+  ) {}
 
   @ResponseMessage('Get bookings successfully')
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: BookingQuery) {
     const { pitchId, venueId, date } = query;
+
+    console.log('date', new Date(date));
 
     return this.bookingService.findAndCount(query, {
       where: {
@@ -41,7 +48,9 @@ export class BookingController {
             id: pitchId,
           },
         }),
-        ...(date && { startTime: Raw((alias) => `DATE(${alias}) = DATE(:date)`, { date }) }),
+        ...(date && {
+          startTime: Raw((alias) => `DATE(${alias}) = DATE(:date)`, { date }),
+        }),
       },
       relations: {
         pitch: {
@@ -124,9 +133,10 @@ export class BookingController {
       },
     });
 
-    console.log(startTime, endTime);
+    const start = dateToTimeFloat(new Date(startTime));
+    const end = dateToTimeFloat(new Date(endTime)) === 0 ? 24 : dateToTimeFloat(new Date(endTime));
 
-    const totalPrice = pitch.price * (dateToTimeFloat(new Date(endTime)) - dateToTimeFloat(new Date(startTime)));
+    const totalPrice = pitch.price * (end - start);
 
     const payload = { ...createBookingDto, user: userId, totalPrice };
 

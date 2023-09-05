@@ -37,6 +37,10 @@ export class UserMigration1691039348322 implements MigrationInterface {
             name: 'role',
             type: 'varchar',
           },
+          {
+            name: 'stripeCustomerId',
+            type: 'varchar',
+          },
           ...BASE_COLUMNS,
         ],
       }),

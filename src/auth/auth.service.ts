@@ -17,6 +17,25 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly forgottenPasswordService: ForgottenPasswordService,
   ) {}
+
+  async handleVerifyToken(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET_KEY,
+      });
+
+      const user = await this.userService.findOne({
+        where: {
+          id: payload.sub,
+        },
+      });
+
+      return user;
+    } catch (e) {
+      throw new UnauthorizedException();
+    }
+  }
+
   async signIn(username: string, password: string) {
     const user = await this.userService.findByUsername(username);
     if (!user) {
@@ -34,6 +53,7 @@ export class AuthService {
       user,
     };
   }
+
   async signUp(createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
     const payload = { sub: user.id, username: user.username };
@@ -44,6 +64,7 @@ export class AuthService {
       user,
     };
   }
+
   async createForgottenPasswordToken(email: string) {
     const forgottenPassword = await this.forgottenPasswordService.findOne({
       where: {

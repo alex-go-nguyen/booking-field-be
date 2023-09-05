@@ -9,11 +9,15 @@ export class BookingMigration1691045913628 implements MigrationInterface {
         columns: [
           {
             name: 'startTime',
-            type: 'timestamptz',
+            type: 'timestamp',
           },
           {
             name: 'endTime',
-            type: 'timestamptz',
+            type: 'timestamp',
+          },
+          {
+            name: 'totalPrice',
+            type: 'int',
           },
           ...BASE_COLUMNS,
         ],

@@ -34,4 +34,5 @@ export const TABLES = {
   pitchCategory: 'pitch-category',
   rating: 'rating',
   forgottenPassword: 'forgotten-password',
+  notification: 'notification',
 };
