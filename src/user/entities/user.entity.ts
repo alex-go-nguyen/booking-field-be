@@ -3,8 +3,10 @@ import { IsEmail } from 'class-validator';
 import { Booking } from 'src/booking/entities/booking.entity';
 import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
-import { ERole } from 'src/common/enums/role.enum';
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
+import { RoleEnum } from 'src/common/enums/role.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
+import { Venue } from 'src/venue/entities/venue.entity';
+import { BeforeInsert, Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
 @Entity(TABLES.user)
 export default class User extends Base {
@@ -32,16 +34,21 @@ export default class User extends Base {
 
   @Column({
     type: 'enum',
-    enum: ERole,
-    default: ERole.User,
+    enum: RoleEnum,
+    default: RoleEnum.User,
   })
-  role: ERole;
+  role: RoleEnum;
+
+  @OneToOne(() => Venue, (venue) => venue.user, { nullable: true })
+  venue: Venue;
 
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
 
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
+
   @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }

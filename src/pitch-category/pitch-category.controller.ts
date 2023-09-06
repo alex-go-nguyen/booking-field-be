@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
-import { Role } from 'src/common/decorators/roles.decorator';
-import { OrderEnum } from 'src/common/enums/order.enum';
-import { ERole } from 'src/common/enums/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { BaseQuery } from 'src/common/dtos/query.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { CreatePitchCategoryDto } from './dtos/create-pitch-category.dto';
 import { UpdatePitchCategoryDto } from './dtos/update-pitch-category.dto';
 import { PitchCategoryService } from './pitch-category.service';
@@ -17,14 +16,8 @@ export class PitchCategoryController {
 
   @ResponseMessage('Get pitch categories successfully')
   @Get()
-  async findAll() {
-    const data = await this.pitchCategoryService.findAll({
-      order: {
-        _id: OrderEnum.Asc,
-      },
-    });
-
-    return { data };
+  findAll(@Query() query: BaseQuery) {
+    return this.pitchCategoryService.findAndCount(query);
   }
 
   @ResponseMessage('Get pitch category successfully')
@@ -32,7 +25,7 @@ export class PitchCategoryController {
   async findOne(@Param('id') id: number) {
     const data = await this.pitchCategoryService.findOne({
       where: {
-        _id: id,
+        id,
       },
     });
 
@@ -40,8 +33,8 @@ export class PitchCategoryController {
   }
 
   @ResponseMessage('Create pitch category successfully')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(ERole.User)
+  @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Post()
   async create(@Body() createPitchCategoryDto: CreatePitchCategoryDto) {
     const data = await this.pitchCategoryService.create(createPitchCategoryDto);
@@ -50,8 +43,8 @@ export class PitchCategoryController {
   }
 
   @ResponseMessage('Update pitch category successfully')
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(ERole.Admin)
+  @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updatePitchCategoryDto: UpdatePitchCategoryDto) {
     const data = await this.pitchCategoryService.update(id, updatePitchCategoryDto);
@@ -60,8 +53,8 @@ export class PitchCategoryController {
   }
 
   @HttpCode(204)
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Role(ERole.Admin)
+  @Roles(RoleEnum.Admin)
+  @UseGuards(RoleGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.pitchCategoryService.softDelete(id);

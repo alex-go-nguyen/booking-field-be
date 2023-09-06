@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreatePitchDto } from './create-pitch.dto';
+import { Pitch } from '../entities/pitch.entity';
 
-export class UpdatePitchDto extends PartialType(CreatePitchDto) {}
+export class UpdatePitchDto extends PartialType(Pitch) {}

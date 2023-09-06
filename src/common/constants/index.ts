@@ -1,10 +1,10 @@
 export const RESPONSE_MESSAGE = 'response_message';
 
-export const ROLE_KEY = 'role';
+export const ROLES_KEY = 'role';
 
 export const BASE_COLUMNS = [
   {
-    name: '_id',
+    name: 'id',
     type: 'int',
     isPrimary: true,
     isGenerated: true,
@@ -33,4 +33,6 @@ export const TABLES = {
   booking: 'booking',
   pitchCategory: 'pitch-category',
   rating: 'rating',
+  forgottenPassword: 'forgotten-password',
+  notification: 'notification',
 };

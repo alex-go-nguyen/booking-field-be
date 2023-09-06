@@ -7,7 +7,7 @@ export class Base {
   @ApiProperty()
   @Expose()
   @PrimaryGeneratedColumn()
-  _id: number;
+  id: number;
 
   @ApiProperty()
   @Expose()

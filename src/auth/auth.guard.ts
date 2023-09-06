@@ -5,9 +5,9 @@ import { UserService } from 'src/user/users.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private userService: UserService) {}
+  constructor(protected jwtService: JwtService, protected userService: UserService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
@@ -20,7 +20,11 @@ export class JwtAuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET_KEY,
       });
 
-      const user = await this.userService.findById(payload.sub);
+      const user = await this.userService.findOne({
+        where: {
+          id: payload.sub,
+        },
+      });
 
       user.password = undefined;
       // 💡 We're assigning the payload to the request object here

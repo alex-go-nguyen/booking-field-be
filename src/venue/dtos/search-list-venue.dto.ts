@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString } from 'class-validator';
-import { IBaseQuery } from 'src/common/dtos/query.dto';
+import { IsInt, IsOptional } from 'class-validator';
+import { BaseQuery } from 'src/common/dtos/query.dto';
 
-export class ISearchListVenueQuery extends IBaseQuery {
+export class SearchListVenueQuery extends BaseQuery {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
@@ -13,11 +13,6 @@ export class ISearchListVenueQuery extends IBaseQuery {
   @ApiPropertyOptional()
   @IsOptional()
   location: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  pitch_type: string;
 
   @ApiPropertyOptional()
   @IsOptional()

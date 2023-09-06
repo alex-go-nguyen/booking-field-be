@@ -1,12 +1,13 @@
 import { NotFoundException } from '@nestjs/common';
 import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
-import { IBaseQuery } from '../dtos/query.dto';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { BaseQuery } from '../dtos/query.dto';
 import { Base } from '../entities/base.entity';
 
 export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
   constructor(protected repo: Repository<Entity>) {}
 
-  async findMany(query: IBaseQuery, options?: FindManyOptions<Entity>) {
+  async findAndCount(query?: BaseQuery, options?: FindManyOptions<Entity>) {
     const { limit, page, sorts } = query;
 
     const take = limit || 0;
@@ -43,14 +44,6 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.find(options);
   }
 
-  findById(_id: number) {
-    return this.repo.findOne({
-      where: {
-        _id,
-      } as FindOptionsWhere<Entity>,
-    });
-  }
-
   findOne(options: FindOneOptions<Entity>) {
     return this.repo.findOne(options);
   }
@@ -61,10 +54,10 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     return this.repo.save(newData);
   }
 
-  async update(_id: number, data: DeepPartial<Dto>) {
+  async update(id: number, data: QueryDeepPartialEntity<Entity>) {
     const existData = await this.findOne({
       where: {
-        _id,
+        id,
       } as FindOptionsWhere<Entity>,
     });
 
@@ -72,15 +65,13 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
       throw new NotFoundException('Resource not found!');
     }
 
-    const updatedData = this.repo.create({ ...existData, ...data });
-
-    return this.repo.save(updatedData);
+    return this.repo.update(id, data);
   }
 
-  async softDelete(_id: number) {
+  async softDelete(id: number) {
     const existData = await this.findOne({
       where: {
-        _id,
+        id,
       } as FindOptionsWhere<Entity>,
     });
 
@@ -88,6 +79,6 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
       throw new NotFoundException('Resource not found!');
     }
 
-    return this.repo.softDelete(_id);
+    return this.repo.softDelete(id);
   }
 }
