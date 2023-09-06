@@ -8,8 +8,8 @@ export class PitchMigration1691045902496 implements MigrationInterface {
         name: TABLES.pitch,
         columns: [
           {
-            name: 'no',
-            type: 'int',
+            name: 'name',
+            type: 'varchar',
           },
           {
             name: 'price',

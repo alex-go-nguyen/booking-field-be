@@ -10,6 +10,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { DatabaseModule } from './database/database.module';
 import { ForgottenPasswordModule } from './forgotten-password/forgotten-password.module';
+import { NotificationModule } from './notification/notification.module';
 import { PitchModule } from './pitch/pitch.module';
 import { PitchCategoryModule } from './pitch-category/pitch-category.module';
 import { RatingModule } from './rating/rating.module';
@@ -77,6 +78,7 @@ import { VenueModule } from './venue/venue.module';
         };
       },
     }),
+    NotificationModule,
   ],
   providers: [
     {

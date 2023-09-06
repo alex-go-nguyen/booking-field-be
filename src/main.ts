@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
+import { Server } from 'socket.io';
 import { AppModule } from './app.module';
 
 dotenv.config();
@@ -17,6 +18,15 @@ const validationPipeOptions: ValidationPipeOptions = {
 };
 
 async function bootstrap() {
+  const io = new Server(3003, { cors: { origin: '*' } });
+
+  io.on('connection', (socket) => {
+    socket.on('disconnect', () => {
+      logger.log(`🚀 Socket server disconnected`);
+    });
+    logger.log(`🚀 Socket server running on http://localhost:${3003}`);
+  });
+
   const app = await NestFactory.create(AppModule, { cors: { origin: '*' } });
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
 

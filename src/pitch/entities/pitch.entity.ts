@@ -8,7 +8,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 @Entity(TABLES.pitch)
 export class Pitch extends Base {
   @Column()
-  no: number;
+  name: string;
 
   @ManyToOne(() => PitchCategory, (pitchCategory) => pitchCategory.pitches)
   @JoinColumn()

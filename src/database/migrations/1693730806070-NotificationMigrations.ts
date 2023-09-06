@@ -1,19 +1,19 @@
 import { BASE_COLUMNS, TABLES } from 'src/common/constants';
 import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
 
-export class RatingMigration1691046028952 implements MigrationInterface {
+export class NotificationMigrations1693730806070 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: TABLES.rating,
+        name: TABLES.notification,
         columns: [
           {
-            name: 'content',
+            name: 'title',
             type: 'varchar',
           },
           {
-            name: 'rate',
-            type: 'float',
+            name: 'message',
+            type: 'varchar',
           },
           ...BASE_COLUMNS,
         ],
@@ -22,28 +22,29 @@ export class RatingMigration1691046028952 implements MigrationInterface {
     );
 
     await queryRunner.addColumn(
-      TABLES.rating,
+      TABLES.notification,
       new TableColumn({
-        name: 'bookingId',
+        name: 'userId',
         type: 'int',
+        isNullable: true,
       }),
     );
 
     await queryRunner.createForeignKey(
-      TABLES.rating,
+      TABLES.notification,
       new TableForeignKey({
-        columnNames: ['bookingId'],
+        columnNames: ['userId'],
         referencedColumnNames: ['id'],
-        referencedTableName: TABLES.booking,
+        referencedTableName: TABLES.user,
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    const ratingTable = await queryRunner.getTable(TABLES.rating);
-    const bookingForeignKey = ratingTable.foreignKeys.find((fk) => fk.columnNames.indexOf('bookingId') !== -1);
+    const table = await queryRunner.getTable(TABLES.notification);
+    const userForeignKey = table.foreignKeys.find((fk) => fk.columnNames.indexOf('userId') !== -1);
 
-    await queryRunner.dropForeignKey(TABLES.rating, bookingForeignKey);
-    await queryRunner.dropTable(TABLES.rating);
+    await queryRunner.dropForeignKey(TABLES.notification, userForeignKey);
+    await queryRunner.dropTable(TABLES.notification);
   }
 }
