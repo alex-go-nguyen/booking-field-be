@@ -74,6 +74,7 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
         const user = await this.authService.handleVerifyToken(token);
 
         socket.join(String(user.id));
+        console.log('connected user', user.username);
       } catch (e) {
         socket.disconnect();
       }
@@ -88,9 +89,13 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     const [type, token] = authHeader.authorization?.split(' ') ?? [];
 
     if (type === 'Bearer' && token) {
-      const user = await this.authService.handleVerifyToken(token);
+      try {
+        const user = await this.authService.handleVerifyToken(token);
 
-      socket.leave(String(user.id));
+        socket.leave(String(user.id));
+      } catch (e) {
+        socket.disconnect();
+      }
     }
   }
 }
