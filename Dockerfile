@@ -6,6 +6,7 @@ RUN yarn
 # CMD ["npm", "run", "start:dev"]
 
 # Production
-RUN npm install -g pm2
+RUN npm install -g @nestjs/cli pm2
+
 CMD ["pm2-runtime", "ecosystem.config.js", "--env", "production"]
 EXPOSE 3000
