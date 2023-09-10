@@ -39,7 +39,7 @@ services:
       - xpack.security.enabled=false
       - node.name=elasticsearch
       - http.port=${ELASTIC_SEARCH_PORT}
-      - http.host=${ELASTIC_SEARCH_HOST}
+      - http.host=0.0.0.0
       - transport.host=${DB_HOST}
       - cluster.name=es-docker-cluster
       - discovery.seed_hosts=elasticsearch
