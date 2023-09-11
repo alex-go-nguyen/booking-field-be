@@ -1,25 +1,27 @@
 version: '3.8'
 
 services:
-  app:
-    container_name: my_app
-    volumes:
-      - .:/app
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - docker.env
-    ports:
-      - '${PORT}:${PORT}'
-    restart: unless-stopped
-    depends_on:
-      - db
-      - es
-    networks:
-      - app-network
+  # app:
+  #   container_name: my_app
+  #   volumes:
+  #     - .:/app
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - docker.env
+  #   ports:
+  #     - '${PORT}:${PORT}'
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #     - es
+  #   networks:
+  #     - app-network
   db:
     image: postgres:13.1
+    env_file:
+      - docker.env
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -56,6 +58,7 @@ services:
       - '${ELASTIC_SEARCH_PORT}:${ELASTIC_SEARCH_PORT}'
     networks:
       - app-network
+
 networks:
   app-network:
     driver: bridge
