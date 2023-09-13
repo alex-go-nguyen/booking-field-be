@@ -91,8 +91,9 @@ export class UserController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    const data = await this.userService.update(id, updateUserDto);
-    return { data };
+    await this.userService.update(id, updateUserDto);
+
+    return this.findOne(id);
   }
 
   @HttpCode(204)

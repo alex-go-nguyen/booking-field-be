@@ -1,23 +1,23 @@
 version: '3.8'
 
 services:
-  app:
-    container_name: my_app
-    volumes:
-      - .:/app
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - docker.env
-    ports:
-      - '${PORT}:${PORT}'
-    restart: unless-stopped
-    depends_on:
-      - db
-      - es
-    networks:
-      - app-network
+  # app:
+  #   container_name: my_app
+  #   volumes:
+  #     - .:/app
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - docker.env
+  #   ports:
+  #     - '${PORT}:${PORT}'
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #     - es
+  #   networks:
+  #     - app-network
   db:
     image: postgres:13.1
     environment:
@@ -26,6 +26,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - '${DB_PORT}:${DB_PORT}'
+    env_file:
+      - docker.env
     volumes:
       - .docker/data/db:/var/lib/postgresql/data
     restart: unless-stopped
@@ -39,7 +41,7 @@ services:
       - xpack.security.enabled=false
       - node.name=elasticsearch
       - http.port=${ELASTIC_SEARCH_PORT}
-      - http.host=${ELASTIC_SEARCH_HOST}
+      - http.host=0.0.0.0
       - transport.host=${DB_HOST}
       - cluster.name=es-docker-cluster
       - discovery.seed_hosts=elasticsearch
@@ -50,6 +52,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    env_file:
+      - docker.env
     volumes:
       - .docker/data/es:/usr/share/elasticsearch/data
     ports:

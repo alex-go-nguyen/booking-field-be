@@ -5,6 +5,7 @@ import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
+import { Tournament } from 'src/tournament/entities/tournament.entity';
 import { Venue } from 'src/venue/entities/venue.entity';
 import { BeforeInsert, Column, Entity, OneToMany, OneToOne } from 'typeorm';
 
@@ -44,6 +45,9 @@ export default class User extends Base {
 
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
+
+  @OneToMany(() => Tournament, (tournament) => tournament.user)
+  tournaments: Tournament[];
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
