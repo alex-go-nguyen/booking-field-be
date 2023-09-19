@@ -3,9 +3,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { CreatePitchCategoryDto } from './dtos/create-pitch-category.dto';
+import { GetPitchCategoriesQuery } from './dtos/pitch-category-query.dto';
 import { UpdatePitchCategoryDto } from './dtos/update-pitch-category.dto';
 import { PitchCategoryService } from './pitch-category.service';
 
@@ -16,8 +16,19 @@ export class PitchCategoryController {
 
   @ResponseMessage('Get pitch categories successfully')
   @Get()
-  findAll(@Query() query: BaseQuery) {
-    return this.pitchCategoryService.findAndCount(query);
+  findAll(@Query() query: GetPitchCategoriesQuery) {
+    const { venueId } = query;
+    return this.pitchCategoryService.findAndCount(query, {
+      where: {
+        ...(venueId && {
+          pitches: {
+            venue: {
+              id: venueId,
+            },
+          },
+        }),
+      },
+    });
   }
 
   @ResponseMessage('Get pitch category successfully')
