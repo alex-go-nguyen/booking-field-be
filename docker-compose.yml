@@ -28,6 +28,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - '${DB_PORT}:${DB_PORT}'
+    env_file:
+      - docker.env
     volumes:
       - .docker/data/db:/var/lib/postgresql/data
     restart: unless-stopped
@@ -58,7 +60,6 @@ services:
   #     - '${ELASTIC_SEARCH_PORT}:${ELASTIC_SEARCH_PORT}'
   #   networks:
   #     - app-network
-
 networks:
   app-network:
     driver: bridge

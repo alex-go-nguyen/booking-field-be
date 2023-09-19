@@ -35,4 +35,8 @@ export const TABLES = {
   rating: 'rating',
   forgottenPassword: 'forgotten-password',
   notification: 'notification',
+  tournament: 'tournament',
+  round: 'round',
+  match: 'match',
+  team: 'team',
 };

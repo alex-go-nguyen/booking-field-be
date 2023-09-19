@@ -10,13 +10,17 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { DatabaseModule } from './database/database.module';
 import { ForgottenPasswordModule } from './forgotten-password/forgotten-password.module';
+import { MatchModule } from './match/match.module';
 import { NotificationModule } from './notification/notification.module';
 import { PitchModule } from './pitch/pitch.module';
 import { PitchCategoryModule } from './pitch-category/pitch-category.module';
 import { RatingModule } from './rating/rating.module';
+import { RoundModule } from './round/round.module';
 import { SearchModule } from './search/search.module';
 import { StripeModule } from './stripe/stripe.module';
 import { StripeService } from './stripe/stripe.service';
+import { TeamModule } from './team/team.module';
+import { TournamentModule } from './tournament/tournament.module';
 import { UserModule } from './user/users.module';
 import { VenueModule } from './venue/venue.module';
 
@@ -79,6 +83,10 @@ import { VenueModule } from './venue/venue.module';
       },
     }),
     NotificationModule,
+    TournamentModule,
+    MatchModule,
+    TeamModule,
+    RoundModule,
   ],
   providers: [
     {

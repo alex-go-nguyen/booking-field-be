@@ -6,10 +6,10 @@ WORKDIR /usr/src/app
 COPY package.json /usr/src/app/
 
 RUN yarn
+# Development
+# CMD ["npm", "run", "start:dev"]
 
 COPY . /usr/src/app
-
-# CMD ["npm", "run", "start:dev"]
 
 # # Production
 RUN npm install -g @nestjs/cli pm2
