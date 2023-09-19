@@ -11,7 +11,7 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
     const { limit, page, sorts } = query;
 
     const take = limit || 0;
-    const skip = (page - 1) * take;
+    const skip = page ? (page - 1) * take : 0;
     const order = {};
 
     sorts?.map((sort) => {

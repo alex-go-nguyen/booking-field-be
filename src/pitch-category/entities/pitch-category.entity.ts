@@ -1,6 +1,7 @@
 import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
+import { Tournament } from 'src/tournament/entities/tournament.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity(TABLES.pitchCategory)
@@ -16,4 +17,7 @@ export class PitchCategory extends Base {
 
   @OneToMany(() => Pitch, (pitch) => pitch.pitchCategory)
   pitches: Pitch[];
+
+  @OneToMany(() => Tournament, (tournament) => tournament.pitchCategory)
+  tournaments: Tournament[];
 }

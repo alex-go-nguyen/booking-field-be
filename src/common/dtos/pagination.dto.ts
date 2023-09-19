@@ -1,7 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
-import {} from '../enums/order.enum';
 
 export class Pagination {
   @ApiPropertyOptional()
@@ -9,7 +8,7 @@ export class Pagination {
   @IsInt()
   @Type(() => Number)
   @Min(1)
-  page = 1;
+  page: number;
 
   @ApiPropertyOptional()
   @IsOptional()

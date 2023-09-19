@@ -33,7 +33,7 @@ export class CloudinaryService {
     });
   }
 
-  async uploadImages({ userId, files }: UploadImages): Promise<UploadApiResponse[]> {
+  uploadImages({ userId, files }: UploadImages): Promise<UploadApiResponse[]> {
     const promiseUploadImages = files.map((file) =>
       this.uploadImage({
         userId,
@@ -41,7 +41,7 @@ export class CloudinaryService {
       }),
     );
 
-    return await Promise.all(promiseUploadImages);
+    return Promise.all(promiseUploadImages);
   }
 
   async deleteFile(id: string) {
