@@ -9,11 +9,29 @@ export class Team extends Base {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   avatar: string;
 
   @Column({ nullable: true })
   contact: string;
+
+  @Column({ nullable: true })
+  contactName: string;
+
+  @Column({ default: 0 })
+  matchesPlayed: number;
+
+  @Column({ default: 0 })
+  win: number;
+
+  @Column({ default: 0 })
+  draw: number;
+
+  @Column({ default: 0 })
+  lose: number;
+
+  @Column({ default: 0 })
+  point: number;
 
   @OneToMany(() => Match, (match) => match.host)
   @OneToMany(() => Match, (match) => match.guest)

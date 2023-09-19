@@ -15,6 +15,7 @@ export class TournamentMigrations1694419561324 implements MigrationInterface {
           {
             name: 'cover',
             type: 'varchar',
+            isNullable: true,
           },
           {
             name: 'mode',

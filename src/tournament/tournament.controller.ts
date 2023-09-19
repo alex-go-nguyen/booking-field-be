@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Query } fro
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { BaseQuery } from 'src/common/dtos/query.dto';
+import { OrderEnum } from 'src/common/enums/order.enum';
 import { createTournament } from 'src/common/utils';
 import { MatchService } from 'src/match/match.service';
 import { RoundService } from 'src/round/round.service';
@@ -23,7 +24,26 @@ export class TournamentController {
 
   @Get()
   findAll(@Query() query: BaseQuery) {
-    return this.tournamentService.findAndCount(query);
+    return this.tournamentService.findAndCount(query, {
+      order: {
+        rounds: {
+          matches: {
+            id: OrderEnum.Asc,
+          },
+        },
+      },
+      relations: {
+        teams: true,
+        rounds: {
+          matches: {
+            host: true,
+            guest: true,
+          },
+        },
+        user: true,
+        venue: true,
+      },
+    });
   }
 
   @Get(':id')
@@ -38,6 +58,8 @@ export class TournamentController {
             guest: true,
           },
         },
+        user: true,
+        venue: true,
       },
     });
 

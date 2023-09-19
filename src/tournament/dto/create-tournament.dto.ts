@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { ModeEnum, TournamentTypeEnum } from '../enums/tournament.enum';
 
 export class CreateTournamentDto {
@@ -7,7 +7,8 @@ export class CreateTournamentDto {
   @IsString()
   name: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   cover: string;
 

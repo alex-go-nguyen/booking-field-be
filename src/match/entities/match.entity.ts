@@ -2,8 +2,7 @@ import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
 import { Round } from 'src/round/entities/round.entity';
 import { Team } from 'src/team/entities/team.entity';
-import { Tournament } from 'src/tournament/entities/tournament.entity';
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity(TABLES.match)
 export class Match extends Base {

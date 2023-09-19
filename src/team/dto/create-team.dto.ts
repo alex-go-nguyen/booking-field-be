@@ -11,6 +11,16 @@ export class CreateTeamDto {
   @IsString()
   contact: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  contactName: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  avatar: string;
+
   @ApiProperty()
   @IsInt()
   tournament: number;

@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { GetTeamsQuery } from './dto/query.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { TeamService } from './team.service';
 
@@ -8,8 +9,15 @@ export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   @Get()
-  findAll() {
-    return this.teamService.findAll();
+  findAll(@Query() query: GetTeamsQuery) {
+    const { tournamentId } = query;
+    return this.teamService.findAndCount(query, {
+      where: {
+        tournament: {
+          id: tournamentId,
+        },
+      },
+    });
   }
 
   @Get(':id')

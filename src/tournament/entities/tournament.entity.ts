@@ -1,6 +1,5 @@
 import { TABLES } from 'src/common/constants';
 import { Base } from 'src/common/entities/base.entity';
-import { Match } from 'src/match/entities/match.entity';
 import { PitchCategory } from 'src/pitch-category/entities/pitch-category.entity';
 import { Round } from 'src/round/entities/round.entity';
 import { Team } from 'src/team/entities/team.entity';
@@ -14,7 +13,7 @@ export class Tournament extends Base {
   @Column({ type: 'text' })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   cover: string;
 
   @Column({
