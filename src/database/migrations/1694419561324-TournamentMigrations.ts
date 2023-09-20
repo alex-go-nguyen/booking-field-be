@@ -24,8 +24,9 @@ export class TournamentMigrations1694419561324 implements MigrationInterface {
           },
           {
             name: 'type',
-            type: 'enum',
-            enum: Object.values(TournamentTypeEnum),
+            type: 'varchar',
+            // type: 'enum',
+            // enum: Object.values(TournamentTypeEnum),
           },
           {
             name: 'totalTeam',
