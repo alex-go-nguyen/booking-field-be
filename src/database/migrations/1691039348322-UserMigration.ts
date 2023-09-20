@@ -40,6 +40,7 @@ export class UserMigration1691039348322 implements MigrationInterface {
           {
             name: 'stripeCustomerId',
             type: 'varchar',
+            isNullable: true,
           },
           ...BASE_COLUMNS,
         ],
