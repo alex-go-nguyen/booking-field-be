@@ -12,9 +12,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           return {
             type: 'postgres',
             url: configService.get('DATABASE_URL'),
-            ssl: {
-              rejectUnauthorized: false,
-            },
+            // ssl: {
+            //   rejectUnauthorized: false,
+            // },
+            
             autoLoadEntities: true,
             synchronize: false,
             logging: true,
