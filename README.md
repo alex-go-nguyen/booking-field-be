@@ -82,3 +82,6 @@ $ yarn run test:e2e
 # test coverage
 $ yarn run test:cov
 ```
+
+## Database Diagram
+![mermaid-diagram-2023-09-20-151717](https://github.com/alex-go-nguyen/booking-field-be/assets/133078261/fcb47320-6afa-4efe-ae9b-7815ec8c9898)
