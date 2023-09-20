@@ -9,6 +9,7 @@ RUN yarn
 
 COPY . /usr/src/app
 
+# Development
 # CMD ["npm", "run", "start:dev"]
 
 # # Production

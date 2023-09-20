@@ -15,11 +15,13 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-      - es
+      # - es
     networks:
       - app-network
   db:
     image: postgres:13.1
+    env_file:
+      - docker.env
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
