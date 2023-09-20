@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
 import { OrderEnum } from 'src/common/enums/order.enum';
 import { TeamService } from 'src/team/team.service';
+import { TournamentTypeEnum } from 'src/tournament/enums/tournament.enum';
 import { IsNull } from 'typeorm';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { GetMatchesQuery } from './dto/match-query.dto';
@@ -32,6 +33,9 @@ export class MatchController {
       order: {
         round: {
           id: OrderEnum.Asc,
+          matches: {
+            id: OrderEnum.Asc,
+          },
         },
       },
     });
@@ -64,57 +68,65 @@ export class MatchController {
     const { data } = await this.findOne(id);
 
     if (updateMatchDto.hostGoals && updateMatchDto.guestGoals) {
-      const match = await this.matchService.findOne({
-        where: [
-          {
-            round: {
-              tournament: {
-                id: data.round.tournament.id,
-              },
-            },
-            host: IsNull(),
-          },
-          {
-            round: {
-              tournament: {
-                id: data.round.tournament.id,
-              },
-            },
-            guest: IsNull(),
-          },
-        ],
-        relations: {
-          host: true,
-          guest: true,
-        },
-      });
-
-      let resultMatch;
+      let resultMatch: string;
       if (data.hostGoals === data.guestGoals) {
         resultMatch = 'draw';
       } else {
         resultMatch = data.hostGoals > data.guestGoals ? 'host' : 'guest';
       }
 
-      const winTeam = resultMatch === 'host' ? data.host : data.guest;
-
-      match &&
-        this.matchService.update(match.id, {
-          ...(!match.host ? { host: winTeam } : { guest: winTeam }),
-        });
-
       this.teamService.update(data.host.id, {
         matchesPlayed: data.host.matchesPlayed + 1,
-        ...(resultMatch === 'host'
-          ? { win: data.host.win + 1, point: data.host.point + 3 }
-          : { lose: data.host.lose + 1 }),
+        ...(resultMatch === 'host' && { win: data.host.win + 1, point: data.host.point + 3 }),
+        ...(resultMatch === 'guest' && { lose: data.host.lose + 1 }),
+        ...(resultMatch === 'draw' && {
+          draw: data.host.draw + 1,
+          point: data.host.point + 1,
+        }),
       });
       this.teamService.update(data.guest.id, {
         matchesPlayed: data.guest.matchesPlayed + 1,
-        ...(resultMatch === 'guest'
-          ? { win: data.guest.win + 1, point: data.guest.point + 3 }
-          : { lose: data.guest.lose + 1 }),
+        ...(resultMatch === 'guest' && { win: data.guest.win + 1, point: data.guest.point + 3 }),
+        ...(resultMatch === 'host' && { lose: data.guest.lose + 1 }),
+        ...(resultMatch === 'draw' && {
+          draw: data.guest.draw + 1,
+          point: data.guest.point + 1,
+        }),
       });
+
+      if (data.round.tournament.type === TournamentTypeEnum.Knockout) {
+        const match = await this.matchService.findOne({
+          where: [
+            {
+              round: {
+                tournament: {
+                  id: data.round.tournament.id,
+                },
+              },
+              host: IsNull(),
+            },
+            {
+              round: {
+                tournament: {
+                  id: data.round.tournament.id,
+                },
+              },
+              guest: IsNull(),
+            },
+          ],
+          relations: {
+            host: true,
+            guest: true,
+          },
+        });
+
+        const winTeam = resultMatch === 'host' ? data.host : data.guest;
+
+        match &&
+          this.matchService.update(match.id, {
+            ...(!match.host ? { host: winTeam } : { guest: winTeam }),
+          });
+      }
     }
 
     return { data };

@@ -10,6 +10,7 @@ import { TeamService } from 'src/team/team.service';
 import { CurrentUser } from 'src/user/user.decorator';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
+import { TournamentTypeEnum } from './enums/tournament.enum';
 import { TournamentService } from './tournament.service';
 
 @ApiTags('Tournament')
@@ -61,6 +62,13 @@ export class TournamentController {
         user: true,
         venue: true,
       },
+      order: {
+        rounds: {
+          matches: {
+            id: OrderEnum.Asc,
+          },
+        },
+      },
     });
 
     return { data };
@@ -77,25 +85,53 @@ export class TournamentController {
 
     teams.sort((a, b) => a.id - b.id);
 
-    for (let index = 0; index < tournm.length; index++) {
-      const round = tournm[index];
+    if (data.type === TournamentTypeEnum.RoundRobin) {
+      const totalRounds = data.totalTeam % 2 === 0 ? data.totalTeam - 1 : data.totalTeam;
 
-      const newRound = await this.roundService.create({ no: round.round, tournament: data.id });
+      const totalMatchesPerRound = (data.totalTeam * (data.totalTeam - 1)) / (2 * totalRounds);
 
-      const totalTeamsPreRound = tournm.slice(0, index).reduce((count, item) => count + item.matches.length * 2, 0);
+      // let totalTeams = teams.length;
+      // if (data.totalTeam % 2 !== 0) {
+      //   teams.push(null); // Thêm đội "BYE" nếu số đội là số lẻ
+      //   totalTeams++;
+      // }
 
-      for (let index = 0; index < round.matches.length; index++) {
-        const currentMatchIndex = totalTeamsPreRound / 2 + index;
-        if (teams.length > totalTeamsPreRound + index) {
-          await this.matchService.create({
-            round: newRound.id,
-            ...(currentMatchIndex * 2 <= teams.length && { host: teams[currentMatchIndex * 2] }),
-            ...(currentMatchIndex * 2 + 1 <= teams.length && { guest: teams[currentMatchIndex * 2 + 1] }),
-          });
-        } else {
-          await this.matchService.create({
-            round: newRound.id,
-          });
+      for (let round = 0; round < totalRounds; round++) {
+        const newRound = await this.roundService.create({ no: round, tournament: data.id });
+
+        for (let i = 0; i < totalMatchesPerRound; i++) {
+          const host = teams[i];
+          const guest = teams[data.totalTeam - 1 - i];
+
+          // if (host !== null && guest !== null) {
+          this.matchService.create({ round: newRound.id, host, guest });
+          // }
+        }
+        teams.splice(1, 0, teams.pop());
+      }
+    }
+
+    if (data.type === TournamentTypeEnum.Knockout) {
+      for (let index = 0; index < tournm.length; index++) {
+        const round = tournm[index];
+
+        const newRound = await this.roundService.create({ no: round.round, tournament: data.id });
+
+        const totalTeamsPreRound = tournm.slice(0, index).reduce((count, item) => count + item.matches.length * 2, 0);
+
+        for (let index = 0; index < round.matches.length; index++) {
+          const currentMatchIndex = totalTeamsPreRound / 2 + index;
+          if (teams.length > totalTeamsPreRound + index) {
+            await this.matchService.create({
+              round: newRound.id,
+              ...(currentMatchIndex * 2 <= teams.length && { host: teams[currentMatchIndex * 2] }),
+              ...(currentMatchIndex * 2 + 1 <= teams.length && { guest: teams[currentMatchIndex * 2 + 1] }),
+            });
+          } else {
+            await this.matchService.create({
+              round: newRound.id,
+            });
+          }
         }
       }
     }
