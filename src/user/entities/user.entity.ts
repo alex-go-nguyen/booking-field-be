@@ -30,7 +30,7 @@ export default class User extends Base {
   @Column()
   phone: string;
 
-  @Column()
+  @Column({ nullable: true })
   stripeCustomerId: string;
 
   @Column({
