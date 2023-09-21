@@ -78,8 +78,9 @@ export class UserController {
   @ResponseMessage('Update password successfully')
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser('id') userId: number) {
-    const data = await this.userService.changePassword(userId, changePasswordDto);
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser() user: User) {
+    const data = await this.userService.changePassword(user.id, changePasswordDto);
+
     return { data };
   }
 

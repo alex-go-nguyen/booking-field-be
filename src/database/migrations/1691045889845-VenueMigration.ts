@@ -14,6 +14,7 @@ export class VenueMigration1691045889845 implements MigrationInterface {
           {
             name: 'location',
             type: 'json',
+            isNullable: true,
           },
           {
             name: 'description',

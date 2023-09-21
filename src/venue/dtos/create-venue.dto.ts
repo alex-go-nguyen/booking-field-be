@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 import { Location } from '../interfaces/location.interface';
 
 export class CreateVenueDto {
@@ -11,7 +11,8 @@ export class CreateVenueDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ type: Location })
+  @ApiPropertyOptional({ type: Location })
+  @IsOptional()
   location: Location;
 
   @ApiProperty()

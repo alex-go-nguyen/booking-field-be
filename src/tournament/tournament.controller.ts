@@ -43,6 +43,7 @@ export class TournamentController {
         },
         user: true,
         venue: true,
+        pitchCategory: true,
       },
     });
   }
@@ -61,6 +62,7 @@ export class TournamentController {
         },
         user: true,
         venue: true,
+        pitchCategory: true,
       },
       order: {
         rounds: {
@@ -77,6 +79,7 @@ export class TournamentController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createTournamentDto: CreateTournamentDto, @CurrentUser('id') userId: number) {
+    console.log(createTournamentDto, userId);
     const data = await this.tournamentService.create({ ...createTournamentDto, user: userId });
 
     const tournm = createTournament(data.totalTeam, data.type);

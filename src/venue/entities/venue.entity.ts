@@ -16,7 +16,7 @@ export class Venue extends Base {
   @Column()
   description: string;
 
-  @Column('jsonb')
+  @Column({ type: 'jsonb', nullable: true })
   location: Location;
 
   @Column()
