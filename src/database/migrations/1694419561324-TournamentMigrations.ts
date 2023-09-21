@@ -24,9 +24,8 @@ export class TournamentMigrations1694419561324 implements MigrationInterface {
           },
           {
             name: 'type',
-            type: 'varchar',
-            // type: 'enum',
-            // enum: Object.values(TournamentTypeEnum),
+            type: 'enum',
+            enum: Object.values(TournamentTypeEnum),
           },
           {
             name: 'totalTeam',
@@ -67,7 +66,7 @@ export class TournamentMigrations1694419561324 implements MigrationInterface {
       new TableForeignKey({
         columnNames: ['pitchCategoryId'],
         referencedColumnNames: ['id'],
-        referencedTableName: TABLES.user,
+        referencedTableName: TABLES.pitchCategory,
       }),
     );
   }

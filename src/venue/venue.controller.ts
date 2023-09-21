@@ -20,7 +20,6 @@ import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { UserService } from 'src/user/users.service';
-import { In } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
 import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
@@ -45,26 +44,12 @@ export class VenueController {
   @Get()
   @ResponseMessage('Get venues successfully')
   async findAll(@Query() query: VenueQuery) {
-    const { location, page, limit, sorts } = query;
-
-    const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
-      'name',
-      'description',
-      'district',
-      'province',
-    ]);
-
-    return this.venueService.findAndCount(
-      { page, limit, sorts },
-      {
-        where: {
-          id: In(ids),
-        },
-        relations: {
-          pitches: true,
-        },
+    return this.venueService.findAndCount(query, {
+      relations: {
+        pitches: true,
+        user: true,
       },
-    );
+    });
   }
 
   @ApiOkResponse({
@@ -156,6 +141,8 @@ export class VenueController {
       province,
       district,
     });
+
+    this.userService.update(createVenueDto.user, { role: RoleEnum.Owner });
 
     return { data };
   }
