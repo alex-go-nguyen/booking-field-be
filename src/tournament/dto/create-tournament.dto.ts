@@ -22,6 +22,10 @@ export class CreateTournamentDto {
 
   @ApiProperty()
   @IsInt()
+  pitchCategory: number;
+
+  @ApiProperty()
+  @IsInt()
   totalTeam: number;
 
   @ApiProperty()

@@ -43,6 +43,38 @@ export class TournamentController {
         },
         user: true,
         venue: true,
+        pitchCategory: true,
+      },
+    });
+  }
+
+  @Get('/me')
+  @UseGuards(JwtAuthGuard)
+  findByCurrentUser(@Query() query: BaseQuery, @CurrentUser('id') userId: number) {
+    return this.tournamentService.findAndCount(query, {
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      order: {
+        rounds: {
+          matches: {
+            id: OrderEnum.Asc,
+          },
+        },
+      },
+      relations: {
+        teams: true,
+        rounds: {
+          matches: {
+            host: true,
+            guest: true,
+          },
+        },
+        user: true,
+        venue: true,
+        pitchCategory: true,
       },
     });
   }
@@ -61,6 +93,7 @@ export class TournamentController {
         },
         user: true,
         venue: true,
+        pitchCategory: true,
       },
       order: {
         rounds: {
