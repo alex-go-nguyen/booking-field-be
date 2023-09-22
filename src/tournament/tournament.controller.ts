@@ -48,6 +48,37 @@ export class TournamentController {
     });
   }
 
+  @Get('/me')
+  @UseGuards(JwtAuthGuard)
+  findByCurrentUser(@Query() query: BaseQuery, @CurrentUser('id') userId: number) {
+    return this.tournamentService.findAndCount(query, {
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      order: {
+        rounds: {
+          matches: {
+            id: OrderEnum.Asc,
+          },
+        },
+      },
+      relations: {
+        teams: true,
+        rounds: {
+          matches: {
+            host: true,
+            guest: true,
+          },
+        },
+        user: true,
+        venue: true,
+        pitchCategory: true,
+      },
+    });
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const data = await this.tournamentService.findOne({
@@ -79,7 +110,6 @@ export class TournamentController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createTournamentDto: CreateTournamentDto, @CurrentUser('id') userId: number) {
-    console.log(createTournamentDto, userId);
     const data = await this.tournamentService.create({ ...createTournamentDto, user: userId });
 
     const tournm = createTournament(data.totalTeam, data.type);
