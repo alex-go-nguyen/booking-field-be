@@ -32,8 +32,6 @@ export class BookingController {
   findAll(@Query() query: BookingQuery) {
     const { pitchId, venueId, date } = query;
 
-    console.log('date', new Date(date));
-
     return this.bookingService.findAndCount(query, {
       where: {
         ...(venueId && {
