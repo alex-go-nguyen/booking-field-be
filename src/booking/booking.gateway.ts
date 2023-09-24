@@ -16,7 +16,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 
-@WebSocketGateway(3002, { cors: { origin: '*' } })
+@WebSocketGateway({ path: '/events', cors: { origin: '*' } })
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -73,7 +73,6 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       try {
         const user = await this.authService.handleVerifyToken(token);
 
-        console.log('connected: ', user.username);
         socket.join(String(user.id));
       } catch (e) {
         socket.disconnect();
