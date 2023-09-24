@@ -1,17 +1,10 @@
-import * as fs from 'fs';
-import * as https from 'https';
 import { Logger, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
-import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
-import express from 'express';
-import * as io from 'socket.io';
 import { AppModule } from './app.module';
 
 dotenv.config();
@@ -23,52 +16,12 @@ const validationPipeOptions: ValidationPipeOptions = {
   forbidUnknownValues: true,
 };
 
-export class ExtendedSocketIoAdapter extends IoAdapter {
-  protected ioServer: io.Server;
-
-  constructor(protected server: https.Server) {
-    super();
-
-    const options = {
-      cors: {
-        origin: true,
-        methods: ['GET', 'POST'],
-        credentials: true,
-      },
-    };
-
-    this.ioServer = new io.Server(server, options);
-  }
-
-  create(_: number) {
-    console.log(
-      'websocket gateway port argument is ignored by ExtendedSocketIoAdapter, use the same port of http instead',
-    );
-    return this.ioServer;
-  }
-}
-
 async function bootstrap() {
-  let httpsOptions: HttpsOptions;
-
-  if (process.env.ENV === 'production') {
-    httpsOptions = {
-      key: './secrets/private-key.pem',
-      cert: './secrets/public-certificate.pem',
-    };
-    console.log(httpsOptions);
-  }
-
-  const httpsServer = https.createServer(httpsOptions);
-
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: '*',
     },
-    httpsOptions,
   });
-
-  app.useWebSocketAdapter(new ExtendedSocketIoAdapter(httpsServer));
 
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
 
