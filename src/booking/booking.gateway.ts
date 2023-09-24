@@ -19,7 +19,7 @@ import { Booking } from './entities/booking.entity';
 @WebSocketGateway({
   path: '/events',
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: 'https://go2play.vercel.app',
     credentials: true,
     allowHeader: {
       'Access-Control-Allow-Headers': 'Content-Type, authorization, x-token',
