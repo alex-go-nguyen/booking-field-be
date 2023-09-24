@@ -55,8 +55,6 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.useWebSocketAdapter(new WsAdapter(app));
-
   app.useGlobalPipes(new ValidationPipe(validationPipeOptions));
 
   app.setGlobalPrefix('api');
