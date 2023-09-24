@@ -1,13 +1,16 @@
+import * as fs from 'fs';
+import * as https from 'https';
 import { Logger, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { ExpressAdapter } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
-import { Server, ServerOptions } from 'socket.io';
+import express from 'express';
+import * as io from 'socket.io';
 import { AppModule } from './app.module';
 
 dotenv.config();
@@ -18,37 +21,42 @@ const validationPipeOptions: ValidationPipeOptions = {
   transform: true,
   forbidUnknownValues: true,
 };
-import { createServer } from 'http';
-const httpServer = createServer();
 
-class SocketAdapter extends IoAdapter {
-  createIOServer(
-    port: number,
-    options?: ServerOptions & {
-      namespace?: string;
-      server?: any;
-    },
-  ) {
-    const server = super.createIOServer(port, { ...options, cors: true });
-    return server;
+export class ExtendedSocketIoAdapter extends IoAdapter {
+  protected ioServer: io.Server;
+
+  constructor(protected server: https.Server) {
+    super();
+
+    const options = {
+      cors: {
+        origin: true,
+        methods: ['GET', 'POST'],
+        credentials: true,
+      },
+    };
+
+    this.ioServer = new io.Server(server, options);
+  }
+
+  create(_: number) {
+    console.log(
+      'websocket gateway port argument is ignored by ExtendedSocketIoAdapter, use the same port of http instead',
+    );
+    return this.ioServer;
   }
 }
 
 async function bootstrap() {
-  const io = new Server(httpServer, { cors: { origin: '*', allowedHeaders: ['Authorization'], credentials: true } });
+  const privateKey = fs.readFileSync('certs/localhost.key', 'utf8');
+  const certificate = fs.readFileSync('certs/localhost.cert', 'utf8');
+  const httpsOptions = { key: privateKey, cert: certificate };
 
-  io.on('connection', (socket) => {
-    socket.on('disconnect', () => {
-      logger.log(`🚀 Socket server disconnected`);
-    });
-    logger.log(`🚀 Socket server running on http://localhost:${3003}`);
-  });
+  const server = express();
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
-  const app = await NestFactory.create(AppModule, {
-    cors: true,
-  });
-
-  app.useWebSocketAdapter(new SocketAdapter(app));
+  const httpsServer = https.createServer(httpsOptions);
+  app.useWebSocketAdapter(new ExtendedSocketIoAdapter(httpsServer));
 
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
 
@@ -75,6 +83,12 @@ async function bootstrap() {
   SwaggerModule.setup('swagger-ui.html', app, document);
 
   app.use(cookieParser());
+
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   app.useGlobalPipes(new ValidationPipe(validationPipeOptions));
 
