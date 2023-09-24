@@ -18,7 +18,7 @@ const validationPipeOptions: ValidationPipeOptions = {
 };
 
 async function bootstrap() {
-  const io = new Server(3003, { cors: { origin: '*' } });
+  const io = new Server(3003, { cors: { origin: '*', credentials: true } });
 
   io.on('connection', (socket) => {
     socket.on('disconnect', () => {
