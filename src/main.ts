@@ -51,24 +51,19 @@ export class ExtendedSocketIoAdapter extends IoAdapter {
 async function bootstrap() {
   let httpsOptions: HttpsOptions;
 
-  const server = express();
-
   if (process.env.ENV === 'production') {
     httpsOptions = {
-      key: fs.readFileSync(process.env.SSL_KEY_PATH),
-      cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+      key: './secrets/private-key.pem',
+      cert: './secrets/public-certificate.pem',
     };
+    console.log(httpsOptions);
   }
 
   const httpsServer = https.createServer(httpsOptions);
 
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
+  const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: ['https://go2play.vercel.app'],
-      methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-      exposedHeaders: ['Authorization'],
-      credentials: true,
+      origin: '*',
     },
     httpsOptions,
   });
