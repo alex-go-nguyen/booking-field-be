@@ -16,7 +16,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 
-@WebSocketGateway(3002, { cors: { origin: '*' } })
+@WebSocketGateway({ path: '/events', cors: { origin: '*' } })
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -28,6 +28,7 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   ) {}
 
   afterInit() {
+    console.log('hihihih');
     this.server.emit('testing', { do: 'stuff' });
   }
 
@@ -65,6 +66,7 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   }
 
   async handleConnection(socket: Socket) {
+    console.log('hohihih', socket);
     const authHeader = socket.handshake.headers;
 
     const [type, token] = authHeader.authorization?.split(' ') ?? [];
@@ -72,6 +74,8 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (type === 'Bearer' && token) {
       try {
         const user = await this.authService.handleVerifyToken(token);
+
+        console.log('connection', user);
 
         socket.join(String(user.id));
       } catch (e) {
