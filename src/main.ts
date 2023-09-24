@@ -27,7 +27,15 @@ async function bootstrap() {
     logger.log(`🚀 Socket server running on http://localhost:${3003}`);
   });
 
-  const app = await NestFactory.create(AppModule, { cors: { origin: '*' } });
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      exposedHeaders: ['Authorization'],
+      credentials: true,
+    },
+  });
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
 
   Sentry.init({
