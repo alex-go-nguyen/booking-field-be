@@ -20,8 +20,6 @@ import { Booking } from './entities/booking.entity';
   path: '/events',
   cors: {
     origin: '*',
-    methods: ['GET', 'POST', 'HEAD', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['socket-header'],
     credentials: true,
   },
 })
