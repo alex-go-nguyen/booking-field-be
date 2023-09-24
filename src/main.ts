@@ -1,6 +1,7 @@
 import { Logger, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
@@ -18,7 +19,7 @@ const validationPipeOptions: ValidationPipeOptions = {
 };
 
 async function bootstrap() {
-  const io = new Server(3003, { cors: { origin: '*', credentials: true } });
+  const io = new Server(3003, { cors: { origin: '*' } });
 
   io.on('connection', (socket) => {
     socket.on('disconnect', () => {
@@ -27,15 +28,7 @@ async function bootstrap() {
     logger.log(`🚀 Socket server running on http://localhost:${3003}`);
   });
 
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-      exposedHeaders: ['Authorization'],
-      credentials: true,
-    },
-  });
+  const app = await NestFactory.create(AppModule, { cors: { origin: '*' } });
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
 
   Sentry.init({
@@ -61,6 +54,8 @@ async function bootstrap() {
   SwaggerModule.setup('swagger-ui.html', app, document);
 
   app.use(cookieParser());
+
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   app.useGlobalPipes(new ValidationPipe(validationPipeOptions));
 
