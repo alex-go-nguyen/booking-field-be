@@ -19,8 +19,11 @@ import { Booking } from './entities/booking.entity';
 @WebSocketGateway({
   path: '/events',
   cors: {
-    origin: '*',
+    origin: 'https://go2play.vercel.app',
     credentials: true,
+    allowHeader: {
+      'Access-Control-Allow-Headers': 'Content-Type, authorization, x-token',
+    },
   },
 })
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
