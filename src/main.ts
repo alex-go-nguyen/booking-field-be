@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as https from 'https';
 import { Logger, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
+import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
@@ -48,14 +49,30 @@ export class ExtendedSocketIoAdapter extends IoAdapter {
 }
 
 async function bootstrap() {
-  const privateKey = fs.readFileSync('certs/localhost.key', 'utf8');
-  const certificate = fs.readFileSync('certs/localhost.cert', 'utf8');
-  const httpsOptions = { key: privateKey, cert: certificate };
+  let httpsOptions: HttpsOptions;
 
   const server = express();
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+
+  if (process.env.ENV === 'production') {
+    httpsOptions = {
+      key: fs.readFileSync(process.env.SSL_KEY_PATH),
+      cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+    };
+  }
 
   const httpsServer = https.createServer(httpsOptions);
+
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
+    cors: {
+      origin: ['https://go2play.vercel.app'],
+      methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      exposedHeaders: ['Authorization'],
+      credentials: true,
+    },
+    httpsOptions,
+  });
+
   app.useWebSocketAdapter(new ExtendedSocketIoAdapter(httpsServer));
 
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
