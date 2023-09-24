@@ -1,12 +1,13 @@
 import { Logger, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
-import { Server } from 'socket.io';
+import { Server, ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 
 dotenv.config();
@@ -17,9 +18,24 @@ const validationPipeOptions: ValidationPipeOptions = {
   transform: true,
   forbidUnknownValues: true,
 };
+import { createServer } from 'http';
+const httpServer = createServer();
+
+class SocketAdapter extends IoAdapter {
+  createIOServer(
+    port: number,
+    options?: ServerOptions & {
+      namespace?: string;
+      server?: any;
+    },
+  ) {
+    const server = super.createIOServer(port, { ...options, cors: true });
+    return server;
+  }
+}
 
 async function bootstrap() {
-  const io = new Server(3003, { cors: { origin: '*' } });
+  const io = new Server(httpServer, { cors: { origin: '*', allowedHeaders: ['Authorization'], credentials: true } });
 
   io.on('connection', (socket) => {
     socket.on('disconnect', () => {
@@ -28,7 +44,12 @@ async function bootstrap() {
     logger.log(`🚀 Socket server running on http://localhost:${3003}`);
   });
 
-  const app = await NestFactory.create(AppModule, { cors: { origin: '*' } });
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+  });
+
+  app.useWebSocketAdapter(new SocketAdapter(app));
+
   const configService: ConfigService = app.get<ConfigService>(ConfigService);
 
   Sentry.init({
