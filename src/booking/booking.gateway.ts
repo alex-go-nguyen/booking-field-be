@@ -73,6 +73,8 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
       try {
         const user = await this.authService.handleVerifyToken(token);
 
+        console.log('user connect: ', user.username);
+
         socket.join(String(user.id));
       } catch (e) {
         socket.disconnect();
