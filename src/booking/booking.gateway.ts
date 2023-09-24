@@ -18,9 +18,6 @@ import { Booking } from './entities/booking.entity';
 
 @WebSocketGateway({
   path: '/events',
-  cors: {
-    origin: '*',
-  },
 })
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
