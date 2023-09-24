@@ -16,7 +16,15 @@ import { NotificationService } from 'src/notification/notification.service';
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 
-@WebSocketGateway({ path: '/events', cors: { origin: '*' } })
+@WebSocketGateway({
+  path: '/events',
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'HEAD', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['socket-header'],
+    credentials: true,
+  },
+})
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
