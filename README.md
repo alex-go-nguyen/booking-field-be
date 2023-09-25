@@ -1,10 +1,9 @@
-# Booking Football Pitch
-
-A football booking pitch website
+# GO2PLAY
+A football venue booking web app
 
 ## Description
 
-Backend app building with nestjs framework
+Backend REST full APIs build in NestJs framework
 
 ## Presequite
 
@@ -316,6 +315,8 @@ $ yarn run test:cov
 ├── tsconfig.json
 └── yarn.lock
 ```
+## Architecture Diagram
+![architecture-diagram](https://github.com/alex-go-nguyen/booking-field-be/assets/133078261/157bcb81-e3cf-4382-ad77-a7d9f09c4b24)
 
 ## Database Diagram
 ![mermaid-diagram-2023-09-20-151717](https://github.com/alex-go-nguyen/booking-field-be/assets/133078261/fcb47320-6afa-4efe-ae9b-7815ec8c9898)
