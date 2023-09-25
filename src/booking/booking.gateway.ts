@@ -17,7 +17,7 @@ import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 
 @WebSocketGateway({
-  cors: { origin: process.env.CLIENT_URL, credentials: true, allowedHeaders: 'authorization' },
+  cors: { origin: true, credentials: true, allowedHeaders: 'authorization' },
 })
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

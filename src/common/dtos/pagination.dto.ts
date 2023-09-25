@@ -6,8 +6,8 @@ export class Pagination {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
-  @Type(() => Number)
   @Min(1)
+  @Type(() => Number)
   page: number;
 
   @ApiPropertyOptional()
