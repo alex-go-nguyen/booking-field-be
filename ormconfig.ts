@@ -1,15 +1,17 @@
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 config();
 
 const configService = new ConfigService();
 
-let connectionOptions;
+let connectionOptions: PostgresConnectionOptions;
 
 if (['staging', 'production'].includes(configService.get('NODE_ENV'))) {
   connectionOptions = {
+    type: 'postgres',
     url: configService.get('DATABASE_URL'),
     // ssl: {
     //   rejectUnauthorized: false,
@@ -17,6 +19,7 @@ if (['staging', 'production'].includes(configService.get('NODE_ENV'))) {
   };
 } else {
   connectionOptions = {
+    type: 'postgres',
     host: configService.get('DB_HOST'),
     port: +configService.get('DB_PORT'),
     username: configService.get('DB_USERNAME'),
@@ -24,16 +27,6 @@ if (['staging', 'production'].includes(configService.get('NODE_ENV'))) {
     database: configService.get('DB_NAME'),
   };
 }
-
-export const AppDataSource = new DataSource({
-  type: 'postgres',
-  ...connectionOptions,
-  entities: ['./src/**/*.entity{.ts,.js}'],
-  synchronize: false,
-  logging: false,
-  migrations: ['./src/database/migrations/**/*{.ts,.js}'],
-  migrationsRun: true,
-});
 
 export default {
   type: 'postgres',

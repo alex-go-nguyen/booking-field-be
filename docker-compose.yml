@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - docker.env
+      - .env
     ports:
       - '${PORT}:${PORT}'
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
   db:
     image: postgres:13.1
     env_file:
-      - docker.env
+      - .env
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -41,8 +41,7 @@ services:
       - xpack.security.enabled=false
       - node.name=elasticsearch
       - http.port=${ELASTIC_SEARCH_PORT}
-      - http.host=0.0.0.0
-      - transport.host=${DB_HOST}
+      - network.host=0.0.0.0
       - cluster.name=es-docker-cluster
       - discovery.seed_hosts=elasticsearch
       - cluster.initial_master_nodes=elasticsearch
@@ -53,7 +52,7 @@ services:
         soft: -1
         hard: -1
     env_file:
-      - docker.env
+      - .env
     volumes:
       - .docker/data/es:/usr/share/elasticsearch/data
     ports:

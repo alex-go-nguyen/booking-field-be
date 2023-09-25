@@ -48,7 +48,7 @@ export class TournamentController {
     });
   }
 
-  @Get('/me')
+  @Get('me')
   @UseGuards(JwtAuthGuard)
   findByCurrentUser(@Query() query: BaseQuery, @CurrentUser('id') userId: number) {
     return this.tournamentService.findAndCount(query, {
