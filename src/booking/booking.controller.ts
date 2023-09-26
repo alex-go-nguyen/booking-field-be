@@ -152,7 +152,7 @@ export class BookingController {
   }
 
   @UseGuards(RoleGuard)
-  @Roles(RoleEnum.Admin)
+  @Roles(RoleEnum.Admin, RoleEnum.Owner)
   @HttpCode(204)
   @Delete(':id')
   delete(@Param('id') id: number) {
