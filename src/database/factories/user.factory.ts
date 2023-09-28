@@ -12,6 +12,7 @@ define(User, () => {
   user.password = faker.internet.password({ length: 10 });
   user.phone = faker.phone.number();
   user.role = RoleEnum.User;
+  user.favorites = null;
   user.createdAt = faker.date.between({ from: '2022-01-01T00:00:00.000', to: '2023-12-31T00:00:00.000' });
 
   return user;

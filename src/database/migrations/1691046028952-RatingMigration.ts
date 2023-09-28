@@ -12,7 +12,11 @@ export class RatingMigration1691046028952 implements MigrationInterface {
             type: 'varchar',
           },
           {
-            name: 'rate',
+            name: 'serviceRate',
+            type: 'float',
+          },
+          {
+            name: 'qualityRate',
             type: 'float',
           },
           ...BASE_COLUMNS,

@@ -7,7 +7,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { AnalystUserQuery } from './dtos/analyst-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { UpdateUserDto } from './dtos/update-info-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserQuery } from './dtos/user-query.dto';
 import User from './entities/user.entity';
 import { CurrentUser } from './user.decorator';
@@ -16,6 +16,7 @@ import { UserService } from './users.service';
 @ApiTags('User')
 @Controller('users')
 export class UserController {
+  jwtService: any;
   constructor(private readonly userService: UserService) {}
 
   @ApiOkResponse({
@@ -45,6 +46,17 @@ export class UserController {
   }
 
   @ApiOkResponse({
+    description: 'Get profile successfully!',
+    type: User,
+  })
+  @ResponseMessage('Get current user successfully')
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getProfile(@CurrentUser() user: User) {
+    return { data: user };
+  }
+
+  @ApiOkResponse({
     description: 'Get user successfully!',
     type: User,
   })
@@ -55,20 +67,14 @@ export class UserController {
       where: {
         id,
       },
+      relations: {
+        venue: true,
+        bookings: true,
+        tournaments: true,
+      },
     });
 
     return { data };
-  }
-
-  @ApiOkResponse({
-    description: 'Get profile successfully!',
-    type: User,
-  })
-  @ResponseMessage('Get current user successfully')
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  getProfile(@CurrentUser() user: User) {
-    return { data: user };
   }
 
   @ApiOkResponse({

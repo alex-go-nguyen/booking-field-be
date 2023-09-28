@@ -9,7 +9,10 @@ export class Rating extends Base {
   content: string;
 
   @Column()
-  rate: number;
+  qualityRate: number;
+
+  @Column()
+  serviceRate: number;
 
   @OneToOne(() => Booking, (booking) => booking.rating)
   @JoinColumn()
