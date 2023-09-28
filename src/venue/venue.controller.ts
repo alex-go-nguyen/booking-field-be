@@ -53,7 +53,7 @@ export class VenueController {
   }
 
   @ApiOkResponse({
-    description: 'Searc venues successfully!',
+    description: 'Search venues successfully!',
     type: Venue,
   })
   @Get('search')
@@ -67,6 +67,13 @@ export class VenueController {
       'district',
       'province',
     ]);
+
+    console.log('hihihi', ids);
+
+    if (ids.length === 0) {
+      console.log('hahaha');
+      return { data: null };
+    }
 
     return this.venueService.searchVenues(query, ids);
   }

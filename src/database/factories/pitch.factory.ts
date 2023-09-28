@@ -6,7 +6,7 @@ define(Pitch, () => {
   const pitch = new Pitch();
 
   pitch.name = `Sân ${faker.number.int({ min: 1, max: 10 })}`;
-  pitch.price = faker.number.int({ min: 100000, max: 500000 });
+  pitch.price = faker.number.int({ min: 100, max: 500 }) * 1000;
 
   return pitch;
 });
