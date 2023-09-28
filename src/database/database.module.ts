@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SearchModule } from 'src/search/search.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         };
       },
     }),
+    SearchModule,
   ],
 })
 export class DatabaseModule {}
