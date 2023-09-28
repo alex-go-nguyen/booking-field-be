@@ -43,6 +43,9 @@ export default class User extends Base {
   @OneToOne(() => Venue, (venue) => venue.user, { nullable: true })
   venue: Venue;
 
+  @Column({ type: 'jsonb', nullable: true })
+  favorites: Venue[];
+
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
 

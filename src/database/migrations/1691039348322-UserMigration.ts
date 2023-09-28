@@ -38,6 +38,11 @@ export class UserMigration1691039348322 implements MigrationInterface {
             type: 'varchar',
           },
           {
+            name: 'favorites',
+            type: 'json',
+            isNullable: true,
+          },
+          {
             name: 'stripeCustomerId',
             type: 'varchar',
             isNullable: true,
