@@ -24,6 +24,9 @@ export class JwtAuthGuard implements CanActivate {
         where: {
           id: payload.sub,
         },
+        relations: {
+          venue: true,
+        },
       });
 
       user.password = undefined;

@@ -32,6 +32,7 @@ const categoryData = [
     thumbnail: 'https://media.diadiem247.com/uploads/w900/2021/06/19/fu1.jpg',
   },
 ];
+
 export default class InitialDatabaseSeed implements Seeder {
   public async run(factory: Factory): Promise<void> {
     await factory(User)({ role: RoleEnum.Admin }).create({
@@ -41,6 +42,7 @@ export default class InitialDatabaseSeed implements Seeder {
       firstName: 'Pro vip',
       lastName: 'Admin',
       phone: '0354560042',
+      favorites: null,
       role: RoleEnum.Admin,
     });
 

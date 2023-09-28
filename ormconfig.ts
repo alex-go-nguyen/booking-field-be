@@ -28,6 +28,16 @@ if (['staging', 'production'].includes(configService.get('NODE_ENV'))) {
   };
 }
 
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  ...connectionOptions,
+  entities: ['./src/**/*.entity{.ts,.js}'],
+  synchronize: false,
+  logging: false,
+  migrations: ['./src/database/migrations/**/*{.ts,.js}'],
+  migrationsRun: true,
+});
+
 export default {
   type: 'postgres',
   ...connectionOptions,
