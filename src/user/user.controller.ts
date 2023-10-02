@@ -5,7 +5,7 @@ import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { Like } from 'typeorm';
+import { ILike } from 'typeorm';
 import { AnalystUserQuery } from './dtos/analyst-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -34,7 +34,7 @@ export class UserController {
     return this.userService.findAndCount(query, {
       where: {
         role,
-        username: Like(`%${keyword}%`),
+        username: ILike(`%${keyword}%`),
       },
     });
   }

@@ -21,7 +21,7 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { CurrentUser } from 'src/user/user.decorator';
 import { UserService } from 'src/user/users.service';
-import { Like } from 'typeorm';
+import { ILike } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
 import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
@@ -63,7 +63,7 @@ export class VenueController {
             },
           }),
           ...(keyword && {
-            name: Like(`%${keyword}%`),
+            name: ILike(`%${keyword}%`),
           }),
         },
         {
@@ -75,7 +75,7 @@ export class VenueController {
           }),
           ...(keyword && {
             user: {
-              username: Like(`%${keyword}%`),
+              username: ILike(`%${keyword}%`),
             },
           }),
         },
