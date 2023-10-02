@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker/locale/vi';
 import { Venue } from 'src/venue/entities/venue.entity';
+import { VenueStatusEnum } from 'src/venue/enums/venue.enum';
 import { define } from 'typeorm-seeding';
 
 define(Venue, () => {
@@ -46,6 +47,7 @@ define(Venue, () => {
   ];
   venue.openAt = '08:00';
   venue.closeAt = '23:00';
+  venue.status = VenueStatusEnum.Active;
 
   return venue;
 });

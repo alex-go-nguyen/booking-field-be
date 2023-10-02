@@ -7,6 +7,7 @@ import { Rating } from 'src/rating/entities/rating.entity';
 import { Repository } from 'typeorm';
 import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { Venue } from './entities/venue.entity';
+import { VenueStatusEnum } from './enums/venue.enum';
 
 @Injectable()
 export class VenueService extends BaseService<Venue, unknown> {
@@ -34,6 +35,7 @@ export class VenueService extends BaseService<Venue, unknown> {
       .andWhere('p.price < :maxPrice')
       .andWhere('p.pitchCategoryId = :pitchCategoryId')
       .andWhere('v.id IN (:...ids)')
+      .andWhere('v.status = :status', { status: VenueStatusEnum.Active })
       .groupBy('v.id')
       .addGroupBy('p.price')
       .addGroupBy('p.pitchCategoryId')

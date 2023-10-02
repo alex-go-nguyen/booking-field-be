@@ -17,7 +17,10 @@ import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 
 @WebSocketGateway({
-  cors: { origin: process.env.CLIENT_URL, credentials: true, allowedHeaders: 'authorization' },
+  cors: {
+    origin: process.env.CLIENT_URL,
+    ...(process.env.NODE_ENV !== 'development' && { origin: '*', credentials: true, allowedHeaders: 'authorization' }),
+  },
 })
 export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -74,8 +77,6 @@ export class BookingGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     if (type === 'Bearer' && token) {
       try {
         const user = await this.authService.handleVerifyToken(token);
-
-        console.log('user connect: ', user);
 
         socket.join(String(user.id));
       } catch (e) {

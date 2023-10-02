@@ -19,12 +19,15 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
+import { CurrentUser } from 'src/user/user.decorator';
 import { UserService } from 'src/user/users.service';
+import { ILike } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
 import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
+import { VenueStatusEnum } from './enums/venue.enum';
 import { VenueSearchBody } from './interfaces/venue-search.interface';
 import { VenueService } from './venue.service';
 
@@ -44,11 +47,39 @@ export class VenueController {
   @Get()
   @ResponseMessage('Get venues successfully')
   async findAll(@Query() query: VenueQuery) {
+    const { userId, status, keyword } = query;
+
     return this.venueService.findAndCount(query, {
       relations: {
-        pitches: true,
+        pitches: { pitchCategory: true },
         user: true,
       },
+      where: [
+        {
+          ...(status ? { status } : { status: VenueStatusEnum.Active }),
+          ...(userId && {
+            user: {
+              id: userId,
+            },
+          }),
+          ...(keyword && {
+            name: ILike(`%${keyword}%`),
+          }),
+        },
+        {
+          ...(status ? { status } : { status: VenueStatusEnum.Active }),
+          ...(userId && {
+            user: {
+              id: userId,
+            },
+          }),
+          ...(keyword && {
+            user: {
+              username: ILike(`%${keyword}%`),
+            },
+          }),
+        },
+      ],
     });
   }
 
@@ -68,28 +99,27 @@ export class VenueController {
       'province',
     ]);
 
-    console.log('hihihi', ids);
-
     if (ids.length === 0) {
-      console.log('hahaha');
       return { data: null };
     }
 
     return this.venueService.searchVenues(query, ids);
   }
-
   @ApiOkResponse({
-    description: 'Get venue successfully!',
+    description: 'Search venues successfully!',
     type: Venue,
   })
-  @Get('user/:userId')
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
+  @Get('me')
   @ResponseMessage('Get venue successfully')
-  async findByUser(@Param('userId') userId: number) {
+  async getVenueByCurrentUser(@CurrentUser('id') userId: number) {
     const data = await this.venueService.findOne({
       where: {
         user: {
           id: userId,
         },
+        status: VenueStatusEnum.Active,
       },
       relations: {
         pitches: {
@@ -98,9 +128,6 @@ export class VenueController {
       },
     });
 
-    if (!data) {
-      throw new NotFoundException('Venue not found');
-    }
     return { data };
   }
 
@@ -114,6 +141,7 @@ export class VenueController {
     const data = await this.venueService.findOne({
       where: {
         slug,
+        status: VenueStatusEnum.Active,
       },
       relations: {
         pitches: {
@@ -133,23 +161,27 @@ export class VenueController {
     description: 'Create Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @Roles(RoleEnum.Admin)
+  @Roles(RoleEnum.User, RoleEnum.Admin)
   @UseGuards(RoleGuard)
   @Post()
   @ResponseMessage('Create Venue successfully')
-  async create(@Body() createVenueDto: CreateVenueDto) {
-    const data = await this.venueService.create(createVenueDto);
+  async create(@Body() createVenueDto: CreateVenueDto, @CurrentUser('role') role: RoleEnum) {
+    const status = role === RoleEnum.Admin ? VenueStatusEnum.Active : VenueStatusEnum.Waiting;
 
-    const { id, name, description, district, province } = data;
-    this.searchService.index<VenueSearchBody>('venues', {
-      id,
-      name,
-      description,
-      province,
-      district,
-    });
+    const data = await this.venueService.create({ ...createVenueDto, status });
 
-    this.userService.update(createVenueDto.user, { role: RoleEnum.Owner });
+    if (role === RoleEnum.Admin) {
+      const { id, name, description, district, province } = data;
+      this.searchService.index<VenueSearchBody>('venues', {
+        id,
+        name,
+        description,
+        province,
+        district,
+      });
+
+      this.userService.update(createVenueDto.user, { role: RoleEnum.Owner });
+    }
 
     return { data };
   }
@@ -163,7 +195,31 @@ export class VenueController {
   @UseGuards(RoleGuard)
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
-    const data = await this.venueService.update(id, updateVenueDto);
+    await this.venueService.update(id, updateVenueDto);
+
+    const data = await this.venueService.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        user: true,
+      },
+    });
+
+    if (data.status === VenueStatusEnum.Active) {
+      const { id, name, description, district, province } = data;
+      this.searchService.index<VenueSearchBody>('venues', {
+        id,
+        name,
+        description,
+        province,
+        district,
+      });
+      this.userService.update(data.user.id, { role: RoleEnum.Owner });
+    }
+    if (data.status === VenueStatusEnum.Cancel) {
+      this.userService.update(data.user.id, { role: RoleEnum.User });
+    }
 
     return { data };
   }
