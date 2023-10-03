@@ -9,17 +9,17 @@ export class CreateTeamDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  contact: string;
+  contact?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  contactName: string;
+  contactName?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  avatar: string;
+  avatar?: string;
 
   @ApiProperty()
   @IsInt()

@@ -4,10 +4,12 @@ import * as bcrypt from 'bcrypt';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { BaseService } from 'src/common/services/base.service';
 import { StripeService } from 'src/stripe/stripe.service';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { AnalystUserQuery } from './dtos/analyst-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { UserQuery } from './dtos/user-query.dto';
 import User from './entities/user.entity';
 
 @Injectable()
@@ -18,6 +20,17 @@ export class UserService extends BaseService<User, CreateUserDto> {
     private readonly stripeService: StripeService,
   ) {
     super(userRepository);
+  }
+
+  findAllUsers(query: UserQuery) {
+    const { role, keyword } = query;
+
+    return this.findAndCount(query, {
+      where: {
+        role,
+        username: ILike(`%${keyword}%`),
+      },
+    });
   }
 
   async me(username: string) {
@@ -78,11 +91,11 @@ export class UserService extends BaseService<User, CreateUserDto> {
 
     const updatedData = this.userRepository.create({ ...user, password: hashPassword });
 
-    const result = await this.repo.save(updatedData);
+    const data = await this.repo.save(updatedData);
 
-    result.password = undefined;
+    data.password = undefined;
 
-    return result;
+    return data;
   }
 
   async setPassword(email: string, newPassword: string) {
@@ -120,5 +133,18 @@ export class UserService extends BaseService<User, CreateUserDto> {
     qb.groupBy("DATE_TRUNC('MONTH', u.createdAt)");
 
     return qb.getRawMany();
+  }
+
+  findById(id: number) {
+    return this.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        venue: true,
+        bookings: true,
+        tournaments: true,
+      },
+    });
   }
 }

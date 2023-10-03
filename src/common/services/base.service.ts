@@ -1,5 +1,12 @@
 import { NotFoundException } from '@nestjs/common';
-import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindManyOptions,
+  FindOneOptions,
+  FindOptionsWhere,
+  FindOptionsWhereProperty,
+  Repository,
+} from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseQuery } from '../dtos/query.dto';
 import { Base } from '../entities/base.entity';
@@ -65,7 +72,13 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
       throw new NotFoundException('Resource not found!');
     }
 
-    return this.repo.update(id, data);
+    await this.repo.update(id, data);
+
+    return this.repo.findOne({
+      where: {
+        id,
+      } as FindOptionsWhere<Entity>,
+    });
   }
 
   async softDelete(id: number) {

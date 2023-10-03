@@ -10,26 +10,17 @@ export class TeamController {
 
   @Get()
   findAll(@Query() query: GetTeamsQuery) {
-    const { tournamentId } = query;
-    return this.teamService.findAndCount(query, {
-      where: {
-        tournament: {
-          id: tournamentId,
-        },
-      },
-    });
+    return this.teamService.findAllTeams(query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.teamService.findOne({ where: { id } });
+    return this.teamService.findById(id);
   }
 
   @Post()
-  async create(@Body() createTeamDto: CreateTeamDto) {
-    const data = await this.teamService.create(createTeamDto);
-
-    return { data };
+  create(@Body() createTeamDto: CreateTeamDto) {
+    return this.teamService.create(createTeamDto);
   }
 
   @Put(':id')

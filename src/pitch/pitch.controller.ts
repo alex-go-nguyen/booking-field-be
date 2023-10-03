@@ -3,6 +3,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
 import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
@@ -20,74 +21,27 @@ export class PitchController {
 
   @ApiOkResponse({
     description: 'Get all pitches successfully!',
-    type: [Pitch],
+    type: BasePaginationResponse<Pitch>,
   })
   @ResponseMessage('Get all pitches successfully')
   @Get()
-  async findAll(@Query() query: PitchQuery) {
-    const { page, limit, pitchCategoryId, venueId, minPrice, maxPrice, location, sorts } = query;
-
-    let ids: number[] = [];
-    if (location) {
-      ids = await this.searchService.search<VenueSearchBody>('venues', location, [
-        'name',
-        'description',
-        'district',
-        'province',
-      ]);
-    }
-
-    return this.pitchService.findAndCount(
-      { page, limit, sorts },
-      {
-        where: {
-          ...(minPrice &&
-            maxPrice && {
-              price: Between(minPrice, maxPrice),
-            }),
-          ...(pitchCategoryId && {
-            pitchCategory: {
-              id: pitchCategoryId,
-            },
-          }),
-          ...(location && {
-            venue: {
-              id: In(ids),
-            },
-          }),
-          ...(venueId && {
-            venue: {
-              id: venueId,
-            },
-          }),
-        },
-        relations: {
-          pitchCategory: true,
-          venue: true,
-        },
-      },
-    );
+  findAll(@Query() query: PitchQuery) {
+    return this.pitchService.findAllPitches(query);
   }
 
   @ApiOkResponse({
     description: 'Get pitch successfully!',
-    type: Pitch,
+    type: BaseResponse<Pitch>,
   })
   @ResponseMessage('Get pitch successfully')
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const data = await this.pitchService.findOne({
-      where: {
-        id,
-      },
-    });
-
-    return { data };
+  findOne(@Param('id') id: number) {
+    return this.pitchService.findById(id);
   }
 
   @ApiOkResponse({
     description: 'Create pitch successfully!',
-    type: Pitch,
+    type: BaseResponse<Pitch>,
   })
   @ResponseMessage('Create pitch successfully')
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
@@ -99,16 +53,14 @@ export class PitchController {
 
   @ApiOkResponse({
     description: 'Update pitch successfully!',
-    type: Pitch,
+    type: BaseResponse<Pitch>,
   })
   @ResponseMessage('Update pitch successfully')
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @UseGuards(RoleGuard)
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updatePitchDto: UpdatePitchDto) {
-    const data = await this.pitchService.update(id, updatePitchDto);
-
-    return { data };
+  update(@Param('id') id: number, @Body() updatePitchDto: UpdatePitchDto) {
+    return this.pitchService.update(id, updatePitchDto);
   }
 
   @ApiOkResponse({

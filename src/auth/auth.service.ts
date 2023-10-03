@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { ForgottenPasswordService } from 'src/forgotten-password/forgotten-password.service';
 import { CreateUserDto } from 'src/user/dtos/create-user.dto';
 import { UserService } from 'src/user/users.service';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -59,10 +60,23 @@ export class AuthService {
     const payload = { sub: user.id, username: user.username };
     const accessToken = this.jwtService.sign(payload);
     user.password = undefined;
+
     return {
       accessToken,
       user,
     };
+  }
+
+  async resetPassword({ newPassword, resetToken }: ResetPasswordDto) {
+    const forgottenPassword = await this.forgottenPasswordService.getForgottenPasswordModel(resetToken);
+
+    const data = await this.userService.setPassword(forgottenPassword.email, newPassword);
+
+    if (data) {
+      await this.forgottenPasswordService.remove(forgottenPassword);
+    }
+
+    return data;
   }
 
   async createForgottenPasswordToken(email: string) {
@@ -100,7 +114,7 @@ export class AuthService {
 
     const { resetToken } = await this.createForgottenPasswordToken(email);
 
-    const sended = await this.mailerService.sendMail({
+    return this.mailerService.sendMail({
       from: this.configService.get<string>('MAILER_USER'),
       to: email,
       subject: 'Forgotten Password',
@@ -110,6 +124,5 @@ export class AuthService {
         resetLink: `${this.configService.get('CLIENT_URL')}/reset-password/${resetToken}`,
       },
     });
-    return sended;
   }
 }

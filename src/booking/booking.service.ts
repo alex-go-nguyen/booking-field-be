@@ -25,7 +25,7 @@ export class BookingService extends BaseService<Booking, unknown> {
   findAllBooking(query: BookingQuery) {
     const { pitchId, venueId, date } = query;
 
-    this.findAndCount(query, {
+    return this.findAndCount(query, {
       where: {
         ...(venueId && {
           pitch: {
@@ -52,7 +52,7 @@ export class BookingService extends BaseService<Booking, unknown> {
     });
   }
 
-  async analystIncome({ year, venueId }: BookingAnalystQuery) {
+  analystIncome({ year, venueId }: BookingAnalystQuery) {
     const qb = this.bookingRepository
       .createQueryBuilder('b')
       .select("TO_CHAR(DATE_TRUNC('DAY', b.createdAt), 'mm/dd/yyyy')", 'day')
@@ -62,11 +62,10 @@ export class BookingService extends BaseService<Booking, unknown> {
       .andWhere('p."venueId" = :venueId', { venueId })
       .groupBy("DATE_TRUNC('DAY', b.createdAt)");
 
-    const data = await qb.getRawMany();
-    return { data };
+    return qb.getRawMany();
   }
 
-  async analystCategory({ year, venueId }: BookingAnalystQuery) {
+  analystCategory({ year, venueId }: BookingAnalystQuery) {
     const qb = this.bookingRepository
       .createQueryBuilder('b')
       .select('p.pitchCategoryId', 'pitchCategoryId')
@@ -79,8 +78,7 @@ export class BookingService extends BaseService<Booking, unknown> {
       .groupBy('pc.name')
       .addGroupBy('p.pitchCategoryId');
 
-    const data = await qb.getRawMany();
-    return { data };
+    return qb.getRawMany();
   }
 
   getUserBookings(id: number, query: BaseQuery) {
@@ -100,8 +98,8 @@ export class BookingService extends BaseService<Booking, unknown> {
     });
   }
 
-  async findOneBooking(id: number) {
-    const data = await this.findOne({
+  findOneBooking(id: number) {
+    return this.findOne({
       where: {
         id,
       },
@@ -114,8 +112,6 @@ export class BookingService extends BaseService<Booking, unknown> {
         rating: true,
       },
     });
-
-    return { data };
   }
 
   async createBooking(createBookingDto: CreateBookingDto, userId: number) {
@@ -134,14 +130,6 @@ export class BookingService extends BaseService<Booking, unknown> {
 
     const payload = { ...createBookingDto, user: userId, totalPrice };
 
-    const data = await this.create(payload);
-
-    return { data };
-  }
-
-  async updateBooking(id: number, updateBookingDto: UpdateBookingDto) {
-    const data = await this.update(id, updateBookingDto);
-
-    return { data };
+    return this.create(payload);
   }
 }

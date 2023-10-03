@@ -29,22 +29,13 @@ export class UserController {
   @ResponseMessage('Get list users successfully')
   @Get()
   findAll(@Query() query: UserQuery) {
-    const { role, keyword } = query;
-
-    return this.userService.findAndCount(query, {
-      where: {
-        role,
-        username: ILike(`%${keyword}%`),
-      },
-    });
+    return this.userService.findAllUsers(query);
   }
 
   @ResponseMessage('Get analyst users successfully')
   @Get('analyst')
-  async analystByMonth(@Query() query: AnalystUserQuery) {
-    const data = await this.userService.analystUserSignIn(query);
-
-    return { data };
+  analystByMonth(@Query() query: AnalystUserQuery) {
+    return this.userService.analystUserSignIn(query);
   }
 
   @ApiOkResponse({
@@ -54,8 +45,8 @@ export class UserController {
   @ResponseMessage('Get current user successfully')
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@CurrentUser() user: User) {
-    return { data: user };
+  getProfile(@CurrentUser() user: User) {
+    return user;
   }
 
   @ApiOkResponse({
@@ -64,19 +55,8 @@ export class UserController {
   })
   @ResponseMessage('Get user successfully')
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const data = await this.userService.findOne({
-      where: {
-        id,
-      },
-      relations: {
-        venue: true,
-        bookings: true,
-        tournaments: true,
-      },
-    });
-
-    return { data };
+  findOne(@Param('id') id: number) {
+    return this.userService.findById(id);
   }
 
   @ApiOkResponse({
@@ -86,10 +66,8 @@ export class UserController {
   @ResponseMessage('Update password successfully')
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser() user: User) {
-    const data = await this.userService.changePassword(user.id, changePasswordDto);
-
-    return { data };
+  changePassword(@Body() changePasswordDto: ChangePasswordDto, @CurrentUser() user: User) {
+    return this.userService.changePassword(user.id, changePasswordDto);
   }
 
   @ApiOkResponse({
@@ -99,10 +77,8 @@ export class UserController {
   @ResponseMessage('Update profile successfully!')
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    await this.userService.update(id, updateUserDto);
-
-    return this.findOne(id);
+  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
   }
 
   @HttpCode(204)
@@ -110,6 +86,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
-    this.userService.softDelete(id);
+    return this.userService.softDelete(id);
   }
 }
