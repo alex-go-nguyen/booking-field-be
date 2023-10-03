@@ -8,7 +8,6 @@ import { ILike, Repository } from 'typeorm';
 import { AnalystUserQuery } from './dtos/analyst-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserQuery } from './dtos/user-query.dto';
 import User from './entities/user.entity';
 

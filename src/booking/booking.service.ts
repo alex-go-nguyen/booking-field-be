@@ -10,7 +10,6 @@ import { Raw, Repository } from 'typeorm';
 import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
 import { BookingQuery } from './dtos/booking-query.dto';
 import { CreateBookingDto } from './dtos/create-booking.dto';
-import { UpdateBookingDto } from './dtos/update-booking.dto';
 import { Booking } from './entities/booking.entity';
 
 @Injectable()

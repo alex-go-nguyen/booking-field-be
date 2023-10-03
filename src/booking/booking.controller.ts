@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
@@ -6,7 +6,6 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { dateToTimeFloat } from 'src/common/utils';
 import { PitchService } from 'src/pitch/pitch.service';
 import { CurrentUser } from 'src/user/user.decorator';
 import { BookingService } from './booking.service';

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, Put } from '@nestjs/common';
 import { CreateRoundDto } from './dto/create-round.dto';
 import { GetRoundsQuery } from './dto/query.dto';
 import { UpdateRoundDto } from './dto/update-round.dto';

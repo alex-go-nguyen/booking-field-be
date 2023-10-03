@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -18,27 +17,18 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { SearchService } from 'src/search/search.service';
 import { CurrentUser } from 'src/user/user.decorator';
-import { UserService } from 'src/user/users.service';
-import { ILike } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
 import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
-import { VenueStatusEnum } from './enums/venue.enum';
-import { VenueSearchBody } from './interfaces/venue-search.interface';
 import { VenueService } from './venue.service';
 
 @ApiTags('Venue')
 @Controller('venues')
 export class VenueController {
-  constructor(
-    private readonly venueService: VenueService,
-    private readonly searchService: SearchService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly venueService: VenueService) {}
 
   @ApiResponse({
     description: 'Get venues successfully',

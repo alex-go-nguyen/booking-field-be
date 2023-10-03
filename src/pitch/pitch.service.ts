@@ -4,9 +4,7 @@ import { BaseService } from 'src/common/services/base.service';
 import { SearchService } from 'src/search/search.service';
 import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
 import { Between, In, Repository } from 'typeorm';
-import { CreatePitchDto } from './dtos/create-pitch.dto';
 import { PitchQuery } from './dtos/pitch-query.dto';
-import { UpdatePitchDto } from './dtos/update-pitch.dto';
 import { Pitch } from './entities/pitch.entity';
 
 @Injectable()

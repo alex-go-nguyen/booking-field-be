@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services/base.service';
 import { Repository } from 'typeorm';
-import { CreatePitchCategoryDto } from './dtos/create-pitch-category.dto';
 import { GetPitchCategoriesQuery } from './dtos/pitch-category-query.dto';
-import { UpdatePitchCategoryDto } from './dtos/update-pitch-category.dto';
 import { PitchCategory } from './entities/pitch-category.entity';
 
 @Injectable()

@@ -2,15 +2,9 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Query } fro
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { BaseQuery } from 'src/common/dtos/query.dto';
-import { OrderEnum } from 'src/common/enums/order.enum';
-import { createTournament } from 'src/common/utils';
-import { MatchService } from 'src/match/match.service';
-import { RoundService } from 'src/round/round.service';
-import { TeamService } from 'src/team/team.service';
 import { CurrentUser } from 'src/user/user.decorator';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
-import { TournamentTypeEnum } from './enums/tournament.enum';
 import { TournamentService } from './tournament.service';
 
 @ApiTags('Tournament')

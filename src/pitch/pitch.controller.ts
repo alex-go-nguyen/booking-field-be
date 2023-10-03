@@ -6,8 +6,6 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { SearchService } from 'src/search/search.service';
-import { VenueSearchBody } from 'src/venue/interfaces/venue-search.interface';
-import { Between, In } from 'typeorm';
 import { CreatePitchDto } from './dtos/create-pitch.dto';
 import { PitchQuery } from './dtos/pitch-query.dto';
 import { UpdatePitchDto } from './dtos/update-pitch.dto';

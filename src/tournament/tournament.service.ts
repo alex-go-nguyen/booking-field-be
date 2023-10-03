@@ -9,7 +9,6 @@ import { RoundService } from 'src/round/round.service';
 import { TeamService } from 'src/team/team.service';
 import { Repository } from 'typeorm';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
-import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import { Tournament } from './entities/tournament.entity';
 import { TournamentTypeEnum } from './enums/tournament.enum';
 

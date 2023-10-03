@@ -1,8 +1,4 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
-import { OrderEnum } from 'src/common/enums/order.enum';
-import { TeamService } from 'src/team/team.service';
-import { TournamentTypeEnum } from 'src/tournament/enums/tournament.enum';
-import { IsNull } from 'typeorm';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { GetMatchesQuery } from './dto/match-query.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';

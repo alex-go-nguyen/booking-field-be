@@ -1,12 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import {
-  DeepPartial,
-  FindManyOptions,
-  FindOneOptions,
-  FindOptionsWhere,
-  FindOptionsWhereProperty,
-  Repository,
-} from 'typeorm';
+import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseQuery } from '../dtos/query.dto';
 import { Base } from '../entities/base.entity';

@@ -16,7 +16,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { CreateRatingDto } from './dtos/create-rating.dto';
-import { RatingQuery } from './dtos/rating-query.dto';
+import { GetRatingQuery } from './dtos/rating-query.dto';
 import { UpdateRatingDto } from './dtos/update-rating.dto';
 import { Rating } from './entities/rating.entity';
 import { RatingService } from './rating.service';
@@ -32,7 +32,7 @@ export class RatingController {
   })
   @ResponseMessage('Get ratings successfully')
   @Get()
-  findAll(@Query() query: RatingQuery) {
+  findAll(@Query() query: GetRatingQuery) {
     return this.ratingService.findAllRating(query);
   }
 
