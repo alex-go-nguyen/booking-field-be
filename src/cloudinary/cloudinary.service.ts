@@ -33,7 +33,7 @@ export class CloudinaryService {
     });
   }
 
-  uploadImages({ userId, files }: UploadImages): Promise<UploadApiResponse[]> {
+  uploadImages({ userId, files }: UploadImages) {
     const promiseUploadImages = files.map((file) =>
       this.uploadImage({
         userId,

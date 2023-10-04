@@ -1,4 +1,5 @@
 import { BASE_COLUMNS, TABLES } from 'src/common/constants';
+import { RoleEnum } from 'src/common/enums/role.enum';
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class UserMigration1691039348322 implements MigrationInterface {
@@ -35,7 +36,8 @@ export class UserMigration1691039348322 implements MigrationInterface {
           },
           {
             name: 'role',
-            type: 'varchar',
+            type: 'enum',
+            enum: Object.values(RoleEnum),
           },
           {
             name: 'favorites',

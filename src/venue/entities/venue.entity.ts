@@ -5,6 +5,7 @@ import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { Tournament } from 'src/tournament/entities/tournament.entity';
 import User from 'src/user/entities/user.entity';
 import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { VenueStatusEnum } from '../enums/venue.enum';
 import { Location } from '../interfaces/location.interface';
 import { VenueImage } from '../interfaces/venue-image.interface';
 
@@ -42,6 +43,9 @@ export class Venue extends Base {
 
   @OneToMany(() => Pitch, (pitch) => pitch.venue)
   pitches: Pitch[];
+
+  @Column()
+  status: VenueStatusEnum;
 
   @OneToMany(() => Tournament, (tournament) => tournament.venue)
   tournaments: Tournament[];

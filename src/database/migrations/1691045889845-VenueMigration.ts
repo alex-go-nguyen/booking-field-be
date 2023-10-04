@@ -1,4 +1,5 @@
 import { BASE_COLUMNS, TABLES } from 'src/common/constants';
+import { VenueStatusEnum } from 'src/venue/enums/venue.enum';
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class VenueMigration1691045889845 implements MigrationInterface {
@@ -31,6 +32,11 @@ export class VenueMigration1691045889845 implements MigrationInterface {
           {
             name: 'district',
             type: 'varchar',
+          },
+          {
+            name: 'status',
+            type: 'enum',
+            enum: Object.values(VenueStatusEnum),
           },
           {
             name: 'imageList',

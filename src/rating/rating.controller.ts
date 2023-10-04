@@ -16,7 +16,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { CreateRatingDto } from './dtos/create-rating.dto';
-import { RatingQuery } from './dtos/rating-query.dto';
+import { GetRatingQuery } from './dtos/rating-query.dto';
 import { UpdateRatingDto } from './dtos/update-rating.dto';
 import { Rating } from './entities/rating.entity';
 import { RatingService } from './rating.service';
@@ -32,31 +32,8 @@ export class RatingController {
   })
   @ResponseMessage('Get ratings successfully')
   @Get()
-  findAll(@Query() query: RatingQuery) {
-    const { venueId } = query;
-
-    return this.ratingService.findAndCount(query, {
-      where: {
-        ...(venueId && {
-          booking: {
-            pitch: {
-              venue: {
-                id: venueId,
-              },
-            },
-          },
-        }),
-      },
-      relations: {
-        booking: {
-          user: true,
-          pitch: {
-            pitchCategory: true,
-            venue: true,
-          },
-        },
-      },
-    });
+  findAll(@Query() query: GetRatingQuery) {
+    return this.ratingService.findAllRating(query);
   }
 
   @ApiResponse({
@@ -65,14 +42,8 @@ export class RatingController {
   })
   @ResponseMessage('Get rating successfully')
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const data = await this.ratingService.findOne({
-      where: {
-        id,
-      },
-    });
-
-    return { data };
+  findOne(@Param('id') id: number) {
+    return this.ratingService.findById(id);
   }
 
   @ApiResponse({
@@ -83,10 +54,8 @@ export class RatingController {
   @ResponseMessage('Create rating successfully')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createRatingDto: CreateRatingDto) {
-    const data = await this.ratingService.create(createRatingDto);
-
-    return { data };
+  create(@Body() createRatingDto: CreateRatingDto) {
+    return this.ratingService.create(createRatingDto);
   }
 
   @ApiResponse({
@@ -97,16 +66,14 @@ export class RatingController {
   @ResponseMessage('Update rating successfully')
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateRatingDto: UpdateRatingDto) {
-    const data = await this.ratingService.update(id, updateRatingDto);
-
-    return { data };
+  update(@Param('id') id: number, @Body() updateRatingDto: UpdateRatingDto) {
+    return this.ratingService.update(id, updateRatingDto);
   }
 
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
-    this.ratingService.softDelete(id);
+    return this.ratingService.softDelete(id);
   }
 }

@@ -65,7 +65,13 @@ export class BaseService<Entity extends Base, Dto extends DeepPartial<Entity>> {
       throw new NotFoundException('Resource not found!');
     }
 
-    return this.repo.update(id, data);
+    await this.repo.update(id, data);
+
+    return this.repo.findOne({
+      where: {
+        id,
+      } as FindOptionsWhere<Entity>,
+    });
   }
 
   async softDelete(id: number) {

@@ -35,15 +35,7 @@ export class NotificationController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: GetNotificationsQuery, @CurrentUser('id') userId: number) {
-    return this.notifcationService.findAndCount(query, {
-      where: {
-        ...(userId && {
-          user: {
-            id: userId,
-          },
-        }),
-      },
-    });
+    return this.notifcationService.findAllNotifications(query, userId);
   }
 
   @ApiOkResponse({
@@ -53,14 +45,8 @@ export class NotificationController {
   @ResponseMessage('Get notification successfully')
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const data = await this.notifcationService.findOne({
-      where: {
-        id,
-      },
-    });
-
-    return { data };
+  findOne(@Param('id') id: number) {
+    return this.notifcationService.findById(id);
   }
 
   @ApiResponse({
@@ -70,9 +56,8 @@ export class NotificationController {
   })
   @ResponseMessage('Create notification successfully')
   @Post()
-  async create(@Body() createNotificationDto: CreateNotificationDto) {
-    const data = this.notifcationService.create(createNotificationDto);
-    return { data };
+  create(@Body() createNotificationDto: CreateNotificationDto) {
+    return this.notifcationService.create(createNotificationDto);
   }
 
   @ApiResponse({
@@ -83,16 +68,14 @@ export class NotificationController {
   @ResponseMessage('Update notification successfully')
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateNotificationDto: UpdateNotificationDto) {
-    const data = await this.notifcationService.update(id, updateNotificationDto);
-
-    return { data };
+  update(@Param('id') id: number, @Body() updateNotificationDto: UpdateNotificationDto) {
+    return this.notifcationService.update(id, updateNotificationDto);
   }
 
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
-    this.notifcationService.softDelete(id);
+    return this.notifcationService.softDelete(id);
   }
 }

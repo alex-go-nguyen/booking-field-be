@@ -17,50 +17,29 @@ export class PitchCategoryController {
   @ResponseMessage('Get pitch categories successfully')
   @Get()
   findAll(@Query() query: GetPitchCategoriesQuery) {
-    const { venueId } = query;
-    return this.pitchCategoryService.findAndCount(query, {
-      where: {
-        ...(venueId && {
-          pitches: {
-            venue: {
-              id: venueId,
-            },
-          },
-        }),
-      },
-    });
+    return this.pitchCategoryService.findAllPitchCategories(query);
   }
 
   @ResponseMessage('Get pitch category successfully')
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const data = await this.pitchCategoryService.findOne({
-      where: {
-        id,
-      },
-    });
-
-    return { data };
+  findOne(@Param('id') id: number) {
+    return this.pitchCategoryService.findById(id);
   }
 
   @ResponseMessage('Create pitch category successfully')
   @Roles(RoleEnum.Admin)
   @UseGuards(RoleGuard)
   @Post()
-  async create(@Body() createPitchCategoryDto: CreatePitchCategoryDto) {
-    const data = await this.pitchCategoryService.create(createPitchCategoryDto);
-
-    return { data };
+  create(@Body() createPitchCategoryDto: CreatePitchCategoryDto) {
+    return this.pitchCategoryService.create(createPitchCategoryDto);
   }
 
   @ResponseMessage('Update pitch category successfully')
   @Roles(RoleEnum.Admin)
   @UseGuards(RoleGuard)
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updatePitchCategoryDto: UpdatePitchCategoryDto) {
-    const data = await this.pitchCategoryService.update(id, updatePitchCategoryDto);
-
-    return { data };
+  update(@Param('id') id: number, @Body() updatePitchCategoryDto: UpdatePitchCategoryDto) {
+    return this.pitchCategoryService.update(id, updatePitchCategoryDto);
   }
 
   @HttpCode(204)

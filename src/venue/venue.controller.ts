@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -18,24 +17,18 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { SearchService } from 'src/search/search.service';
-import { UserService } from 'src/user/users.service';
+import { CurrentUser } from 'src/user/user.decorator';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
 import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
-import { VenueSearchBody } from './interfaces/venue-search.interface';
 import { VenueService } from './venue.service';
 
 @ApiTags('Venue')
 @Controller('venues')
 export class VenueController {
-  constructor(
-    private readonly venueService: VenueService,
-    private readonly searchService: SearchService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly venueService: VenueService) {}
 
   @ApiResponse({
     description: 'Get venues successfully',
@@ -43,13 +36,8 @@ export class VenueController {
   })
   @Get()
   @ResponseMessage('Get venues successfully')
-  async findAll(@Query() query: VenueQuery) {
-    return this.venueService.findAndCount(query, {
-      relations: {
-        pitches: true,
-        user: true,
-      },
-    });
+  findAll(@Query() query: VenueQuery) {
+    return this.venueService.findAllVenues(query);
   }
 
   @ApiOkResponse({
@@ -58,50 +46,19 @@ export class VenueController {
   })
   @Get('search')
   @ResponseMessage('Get venue successfully')
-  async searchVenues(@Query() query: SearchListVenueQuery) {
-    const { location } = query;
-
-    const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
-      'name',
-      'description',
-      'district',
-      'province',
-    ]);
-
-    console.log('hihihi', ids);
-
-    if (ids.length === 0) {
-      console.log('hahaha');
-      return { data: null };
-    }
-
-    return this.venueService.searchVenues(query, ids);
+  searchVenues(@Query() query: SearchListVenueQuery) {
+    return this.venueService.searchVenues(query);
   }
-
   @ApiOkResponse({
-    description: 'Get venue successfully!',
+    description: 'Search venues successfully!',
     type: Venue,
   })
-  @Get('user/:userId')
+  @Roles(RoleEnum.Owner, RoleEnum.Admin)
+  @UseGuards(RoleGuard)
+  @Get('me')
   @ResponseMessage('Get venue successfully')
-  async findByUser(@Param('userId') userId: number) {
-    const data = await this.venueService.findOne({
-      where: {
-        user: {
-          id: userId,
-        },
-      },
-      relations: {
-        pitches: {
-          pitchCategory: true,
-        },
-      },
-    });
-
-    if (!data) {
-      throw new NotFoundException('Venue not found');
-    }
-    return { data };
+  getVenueByCurrentUser(@CurrentUser('id') userId: number) {
+    return this.venueService.getVenueByCurrentUser(userId);
   }
 
   @ApiOkResponse({
@@ -110,22 +67,8 @@ export class VenueController {
   })
   @Get(':slug')
   @ResponseMessage('Get venue successfully')
-  async findBySlug(@Param('slug') slug: string) {
-    const data = await this.venueService.findOne({
-      where: {
-        slug,
-      },
-      relations: {
-        pitches: {
-          pitchCategory: true,
-        },
-      },
-    });
-
-    if (!data) {
-      throw new NotFoundException('Venue not found');
-    }
-    return { data };
+  findBySlug(@Param('slug') slug: string) {
+    return this.venueService.findBySlug(slug);
   }
 
   @ApiResponse({
@@ -133,25 +76,12 @@ export class VenueController {
     description: 'Create Venue successfully',
     type: BaseResponse<Venue>,
   })
-  @Roles(RoleEnum.Admin)
+  @Roles(RoleEnum.User, RoleEnum.Admin)
   @UseGuards(RoleGuard)
   @Post()
   @ResponseMessage('Create Venue successfully')
-  async create(@Body() createVenueDto: CreateVenueDto) {
-    const data = await this.venueService.create(createVenueDto);
-
-    const { id, name, description, district, province } = data;
-    this.searchService.index<VenueSearchBody>('venues', {
-      id,
-      name,
-      description,
-      province,
-      district,
-    });
-
-    this.userService.update(createVenueDto.user, { role: RoleEnum.Owner });
-
-    return { data };
+  async create(@Body() createVenueDto: CreateVenueDto, @CurrentUser('role') role: RoleEnum) {
+    return this.venueService.createVenue(createVenueDto, role);
   }
 
   @ApiResponse({
@@ -162,10 +92,8 @@ export class VenueController {
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @UseGuards(RoleGuard)
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
-    const data = await this.venueService.update(id, updateVenueDto);
-
-    return { data };
+  update(@Param('id') id: number, @Body() updateVenueDto: UpdateVenueDto) {
+    return this.venueService.updateVenue(id, updateVenueDto);
   }
 
   @HttpCode(204)
@@ -173,6 +101,6 @@ export class VenueController {
   @UseGuards(RoleGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
-    this.venueService.softDelete(id);
+    return this.venueService.softDelete(id);
   }
 }
