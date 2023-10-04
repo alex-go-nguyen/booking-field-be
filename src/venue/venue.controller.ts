@@ -105,6 +105,17 @@ export class VenueController {
 
     return this.venueService.searchVenues(query, ids);
   }
+
+  @ApiOkResponse({
+    description: 'Search venues successfully!',
+    type: Venue,
+  })
+  @Get('prominant')
+  @ResponseMessage('Get venue successfully')
+  getProminantVenues() {
+    return this.venueService.getProminantVenues();
+  }
+
   @ApiOkResponse({
     description: 'Search venues successfully!',
     type: Venue,
