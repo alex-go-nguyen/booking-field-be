@@ -1,106 +1,150 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { GetTeamsQuery } from './dto/query.dto';
+import { Team } from './entities/team.entity';
 import { TeamService } from './team.service';
 
-const mockTeam = () => {
-  return {
-    name: 'team 1',
-    avatar: 'img-url',
-    contact: '0123456789',
-  };
-};
-
-const mockTeams = () => {
-  return [
-    {
-      name: 'team 1',
-      avatar: 'img-url',
-      contact: '0123456789',
-    },
-    {
-      name: 'team 2',
-      avatar: 'img-url',
-      contact: '0123456789',
-    },
-    {
-      name: 'team 3',
-      avatar: 'img-url',
-      contact: '0123456789',
-    },
-    {
-      name: 'team 4',
-      avatar: 'img-url',
-      contact: '0123456789',
-    },
-  ];
-};
-
-const teamServiceMock: Partial<TeamService> = {
-  findOne: jest.fn().mockResolvedValue(mockTeam()),
-  findAll: jest.fn().mockResolvedValue(mockTeams()),
-};
-
-describe('RoundService', () => {
+describe('TeamService', () => {
   let service: TeamService;
+  let roundRepository: Repository<Team>;
+
+  const mockTeamRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    findAndCount: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TeamService, { provide: TeamService, useValue: teamServiceMock }],
+      providers: [
+        TeamService,
+        {
+          provide: getRepositoryToken(Team),
+          useValue: mockTeamRepository,
+        },
+      ],
     }).compile();
 
     service = module.get<TeamService>(TeamService);
+    roundRepository = module.get<Repository<Team>>(getRepositoryToken(Team));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getTeam', () => {
-    it('should return round', async () => {
-      const result = {
-        name: 'team 1',
-        avatar: 'img-url',
-        contact: '0123456789',
+  describe('findAllTeam', () => {
+    it('should find and count rounds with given query', async () => {
+      const query: GetTeamsQuery = {
+        tournamentId: 1,
+        page: 1,
+        limit: 0,
       };
 
-      teamServiceMock.findOne = jest.fn().mockResolvedValue(result);
+      const teams = [{ id: 1 }, { id: 2 }];
+      const totalCount = 2;
 
-      await expect(
-        service.findOne({
-          where: {
-            id: 1,
+      mockTeamRepository.findAndCount.mockResolvedValue([teams, totalCount]);
+
+      const result = await service.findAllTeams(query);
+
+      expect(mockTeamRepository.findAndCount).toHaveBeenCalledWith({
+        take: 0,
+        skip: 0,
+        order: {},
+        where: {
+          tournament: {
+            id: query.tournamentId,
           },
-        }),
-      ).resolves.toEqual(result);
+        },
+      });
+      expect(result).toEqual({
+        data: teams,
+        pageInfo: {
+          count: 2,
+          page: 1,
+          pageCount: 1,
+          pageSize: 2,
+        },
+      });
+    });
+
+    it('should find and count all rounds when no query provided', async () => {
+      const query = {} as GetTeamsQuery;
+
+      const rounds = [{ id: 1 }, { id: 2 }];
+      const totalCount = 2;
+
+      mockTeamRepository.findAndCount.mockResolvedValue([rounds, totalCount]);
+
+      const result = await service.findAllTeams(query);
+
+      expect(mockTeamRepository.findAndCount).toHaveBeenCalledWith({
+        take: 0,
+        skip: 0,
+        order: {},
+        where: {
+          tournament: {
+            id: undefined,
+          },
+        },
+      });
+      expect(result).toEqual({
+        data: rounds,
+        pageInfo: {
+          count: 2,
+          page: undefined,
+          pageCount: 1,
+          pageSize: 2,
+        },
+      });
     });
   });
 
-  describe('getAllTeams', () => {
-    it('should return array of team', async () => {
-      const results = [
-        {
-          name: 'team 1',
-          avatar: 'img-url',
-          contact: '0123456789',
-        },
-        {
-          name: 'team 2',
-          avatar: 'img-url',
-          contact: '0123456789',
-        },
-        {
-          name: 'team 3',
-          avatar: 'img-url',
-          contact: '0123456789',
-        },
-        {
-          name: 'team 4',
-          avatar: 'img-url',
-          contact: '0123456789',
-        },
-      ];
-      teamServiceMock.findAll = jest.fn().mockResolvedValue(results);
+  describe('findById', () => {
+    it('should find a round by ID', async () => {
+      const teamId = 1;
+      const round = { id: teamId };
 
-      await expect(service.findAll()).resolves.toEqual(results);
+      mockTeamRepository.findOne.mockResolvedValue(round);
+
+      const result = await service.findById(teamId);
+
+      expect(mockTeamRepository.findOne).toHaveBeenCalledWith({ where: { id: teamId } });
+      expect(result).toEqual(round);
+    });
+
+    it('should return null when no round found with the given ID', async () => {
+      const teamId = 1;
+
+      mockTeamRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findById(teamId);
+
+      expect(mockTeamRepository.findOne).toHaveBeenCalledWith({ where: { id: teamId } });
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('createTeams', () => {
+    it('should create and return teams with given total and tournament ID', async () => {
+      const totalTeam = 3;
+      const tournamentId = 1;
+      const createdTeams = [
+        { name: '1', tournament: tournamentId },
+        { name: '2', tournament: tournamentId },
+        { name: '3', tournament: tournamentId },
+      ];
+
+      mockTeamRepository.create.mockReturnValue(createdTeams);
+      mockTeamRepository.save.mockResolvedValue(createdTeams);
+
+      await service.createTeams(totalTeam, tournamentId);
+
+      expect(mockTeamRepository.create).toHaveBeenCalledTimes(totalTeam);
+      expect(mockTeamRepository.save).toHaveBeenCalledWith(createdTeams);
     });
   });
 });

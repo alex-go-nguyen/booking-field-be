@@ -1,107 +1,131 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { GetNotificationsQuery } from './dtos/notification-query.dto';
+import { Notification } from './entities/notification.entity';
 import { NotificationService } from './notification.service';
-
-const mockNotification = () => {
-  return {
-    id: 1,
-    title: 'title',
-    message: 'message',
-  };
-};
-
-const mockNotifications = () => {
-  return [
-    {
-      id: 1,
-      title: 'title',
-      message: 'message',
-    },
-    {
-      id: 2,
-      title: 'title',
-      message: 'message',
-    },
-    {
-      id: 3,
-      title: 'title',
-      message: 'message',
-    },
-    {
-      id: 4,
-      title: 'title',
-      message: 'message',
-    },
-  ];
-};
-
-const notificationServiceMock: Partial<NotificationService> = {
-  findOne: jest.fn().mockResolvedValue(mockNotification()),
-  findAll: jest.fn().mockResolvedValue(mockNotifications()),
-};
 
 describe('NotificationService', () => {
   let service: NotificationService;
+  let notificationRepository: Repository<Notification>;
+
+  const mockNotificationRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    findAndCount: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [NotificationService, { provide: NotificationService, useValue: notificationServiceMock }],
+      providers: [
+        NotificationService,
+        {
+          provide: getRepositoryToken(Notification),
+          useValue: mockNotificationRepository,
+        },
+      ],
     }).compile();
 
     service = module.get<NotificationService>(NotificationService);
+    notificationRepository = module.get<Repository<Notification>>(getRepositoryToken(Notification));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getMatch', () => {
-    it('should return notification', async () => {
-      const result = {
-        id: 1,
-        title: 'title',
-        message: 'message',
+  describe('findAllNotification', () => {
+    it('should find and count notifications with given query', async () => {
+      const query: GetNotificationsQuery = {
+        page: 1,
+        limit: 0,
       };
 
-      notificationServiceMock.findOne = jest.fn().mockResolvedValue(result);
+      const notifications = [{ id: 1 }, { id: 2 }];
+      const userId = 1;
+      const totalCount = 2;
 
-      await expect(
-        service.findOne({
-          where: {
-            id: 1,
+      mockNotificationRepository.findAndCount.mockResolvedValue([notifications, totalCount]);
+
+      const result = await service.findAllNotifications(query, userId);
+
+      expect(mockNotificationRepository.findAndCount).toHaveBeenCalledWith({
+        take: 0,
+        skip: 0,
+        order: {},
+        where: {
+          user: {
+            id: userId,
           },
-        }),
-      ).resolves.toEqual(result);
+        },
+      });
+      expect(result).toEqual({
+        data: notifications,
+        pageInfo: {
+          count: 2,
+          page: 1,
+          pageCount: 1,
+          pageSize: 2,
+        },
+      });
+    });
+
+    it('should find and count all notifications when no query provided', async () => {
+      const query = {} as GetNotificationsQuery;
+
+      const notifcations = [{ id: 1 }, { id: 2 }];
+      const totalCount = 2;
+      const userId = 1;
+
+      mockNotificationRepository.findAndCount.mockResolvedValue([notifcations, totalCount]);
+
+      const result = await service.findAllNotifications(query, userId);
+
+      expect(mockNotificationRepository.findAndCount).toHaveBeenCalledWith({
+        take: 0,
+        skip: 0,
+        order: {},
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+      });
+      expect(result).toEqual({
+        data: notifcations,
+        pageInfo: {
+          count: 2,
+          page: undefined,
+          pageCount: 1,
+          pageSize: 2,
+        },
+      });
     });
   });
 
-  describe('getAllMatchOfTournament', () => {
-    it('should return array of team', async () => {
-      const results = [
-        {
-          id: 1,
-          title: 'title',
-          message: 'message',
-        },
-        {
-          id: 2,
-          title: 'title',
-          message: 'message',
-        },
-        {
-          id: 3,
-          title: 'title',
-          message: 'message',
-        },
-        {
-          id: 4,
-          title: 'title',
-          message: 'message',
-        },
-      ];
+  describe('findById', () => {
+    it('should find a notification by ID', async () => {
+      const notificationId = 1;
+      const notification = { id: notificationId };
 
-      notificationServiceMock.findAll = jest.fn().mockResolvedValue(results);
+      mockNotificationRepository.findOne.mockResolvedValue(notification);
 
-      await expect(service.findAll()).resolves.toEqual(results);
+      const result = await service.findById(notificationId);
+
+      expect(mockNotificationRepository.findOne).toHaveBeenCalledWith({ where: { id: notificationId } });
+      expect(result).toEqual(notification);
+    });
+
+    it('should return null when no notification found with the given ID', async () => {
+      const notificationId = 1;
+
+      mockNotificationRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findById(notificationId);
+
+      expect(mockNotificationRepository.findOne).toHaveBeenCalledWith({ where: { id: notificationId } });
+      expect(result).toBeNull();
     });
   });
 });
