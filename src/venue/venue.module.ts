@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Booking } from 'src/booking/entities/booking.entity';
+import { Booking } from 'src/booking/entities/booking.entity';
 import { NotificationModule } from 'src/notification/notification.module';
 import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { Rating } from 'src/rating/entities/rating.entity';
