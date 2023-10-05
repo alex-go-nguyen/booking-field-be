@@ -1,6 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { BaseQuery } from 'src/common/dtos/query.dto';
 import { VenueStatusEnum } from '../enums/venue.enum';
 
@@ -18,10 +17,4 @@ export class VenueQuery extends BaseQuery {
   @IsOptional()
   @IsString()
   keyword: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isProminant: boolean;
 }
