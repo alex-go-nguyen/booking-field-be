@@ -56,42 +56,6 @@ export class VenueService extends BaseService<Venue, unknown> {
       });
     }
 
-    // if (currentLat && currentLng) {
-    //   qb.addSelect(
-    //     `( 6371 * acos( cos( radians(${currentLat}) ) * cos( radians( CAST(v.location->>'lat' AS double precision)) ) * cos( radians( CAST(v.location->>'lng' AS double precision)) - radians(${currentLng}) ) + sin( radians(${currentLat}) ) * sin( radians( CAST(v.location->>'lat' AS double precision) ) ) ) )`,
-    //     'distance',
-    //   )
-    //     .andWhere(
-    //       `( 6371 * acos( cos( radians(${currentLat}) ) * cos( radians( CAST(v.location->>'lat' AS double precision)) ) * cos( radians( CAST(v.location->>'lng' AS double precision)) - radians(${currentLng}) ) + sin( radians(${currentLat}) ) * sin( radians( CAST(v.location->>'lat' AS double precision) ) ) ) ) < :maxDistance`,
-    //       { maxDistance },
-    //     )
-    //     .addOrderBy('distance', 'ASC')
-    //     .offset(skip)
-    //     .limit(take);
-    // }
-
-    // if (isProminant) {
-    //   qb.leftJoinAndSelect(
-    //     (subQb) => {
-    //       return subQb
-    //         .select('COUNT(b.id)', 'totalBooking')
-    //         .addSelect('v.id', 'id')
-    //         .from(Venue, 'v')
-    //         .leftJoin(Pitch, 'p', 'p."venueId" = v.id')
-    //         .leftJoin(Booking, 'b', 'b."pitchId" = p.id')
-    //         .groupBy('p."venueId"')
-    //         .addGroupBy('v.id');
-    //     },
-    //     'rs',
-    //     'rs.id = v.id',
-    //   )
-    //     .orderBy('rs."totalBooking"', 'DESC')
-    //     .offset(skip)
-    //     .limit(take);
-    // } else {
-    //   qb.take(take).skip(skip);
-    // }
-
     qb.take(take).skip(skip);
 
     const [data, count] = await qb.getManyAndCount();
