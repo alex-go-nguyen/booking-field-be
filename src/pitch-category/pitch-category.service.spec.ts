@@ -1,117 +1,123 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { GetPitchCategoriesQuery } from './dtos/pitch-category-query.dto';
+import { PitchCategory } from './entities/pitch-category.entity';
 import { PitchCategoryService } from './pitch-category.service';
-
-const mockPitchCategory = () => {
-  return {
-    id: 1,
-    name: 'Sân 5',
-    description: 'lorem ipsum',
-    thumbnail: 'avatar',
-  };
-};
-
-const mockPitchCategories = () => {
-  return [
-    {
-      id: 1,
-      name: 'Sân 5',
-      description: 'lorem ipsum',
-      thumbnail: 'avatar',
-    },
-    {
-      id: 2,
-      name: 'Sân 7',
-      description: 'lorem ipsum',
-      thumbnail: 'avatar',
-    },
-    {
-      id: 3,
-      name: 'Sân 11',
-      description: 'lorem ipsum',
-      thumbnail: 'avatar',
-    },
-    {
-      id: 4,
-      name: 'Sân Futsal',
-      description: 'lorem ipsum',
-      thumbnail: 'avatar',
-    },
-  ];
-};
-
-const pitchCategoryServiceMock: Partial<PitchCategoryService> = {
-  findOne: jest.fn().mockResolvedValue(mockPitchCategory()),
-  findAll: jest.fn().mockResolvedValue(mockPitchCategories()),
-};
 
 describe('PitchCategoryService', () => {
   let service: PitchCategoryService;
+  let ratingRepository: Repository<PitchCategory>;
+
+  const mockPitchCategoryRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    findAndCount: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PitchCategoryService, { provide: PitchCategoryService, useValue: pitchCategoryServiceMock }],
+      providers: [
+        PitchCategoryService,
+        {
+          provide: getRepositoryToken(PitchCategory),
+          useValue: mockPitchCategoryRepository,
+        },
+      ],
     }).compile();
 
     service = module.get<PitchCategoryService>(PitchCategoryService);
+    ratingRepository = module.get<Repository<PitchCategory>>(getRepositoryToken(PitchCategory));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getPitch', () => {
-    it('should return pitch category', async () => {
-      const result = {
-        id: 1,
-        name: 'Sân 5',
-        description: 'lorem ipsum',
-        thumbnail: 'avatar',
+  describe('findAllPitchCategory', () => {
+    it('should find and count pitchCategories with given query', async () => {
+      const query: GetPitchCategoriesQuery = {
+        page: 1,
+        limit: 0,
+        venueId: 1,
       };
 
-      pitchCategoryServiceMock.findOne = jest.fn().mockResolvedValue(result);
+      const pitchCategories = [{ id: 1 }, { id: 2 }];
+      const totalCount = 2;
 
-      await expect(
-        service.findOne({
-          where: {
-            id: 1,
+      mockPitchCategoryRepository.findAndCount.mockResolvedValue([pitchCategories, totalCount]);
+
+      const result = await service.findAllPitchCategories(query);
+
+      expect(mockPitchCategoryRepository.findAndCount).toHaveBeenCalledWith({
+        take: 0,
+        skip: 0,
+        order: {},
+        where: {
+          pitches: {
+            venue: {
+              id: 1,
+            },
           },
-        }),
-      ).resolves.toEqual(result);
+        },
+      });
+      expect(result).toEqual({
+        data: pitchCategories,
+        pageInfo: {
+          count: 2,
+          page: 1,
+          pageCount: 1,
+          pageSize: 2,
+        },
+      });
     });
+
+    // it('should find and count all pitchCategories when no query provided', async () => {
+    //   const query = {} as GetPitchCategorysQuery;
+
+    //   const pitchCategories = [{ id: 1 }, { id: 2 }];
+    //   const totalCount = 2;
+
+    //   mockPitchCategoryRepository.findAndCount.mockResolvedValue([pitchCategories, totalCount]);
+
+    //   const result = await service.findAllPitchCategory(query);
+
+    //   expect(mockPitchCategoryRepository.findAndCount).toHaveBeenCalledWith({ take: 0, skip: 0, order: {}, where: {} });
+    //   expect(result).toEqual({
+    //     data: pitchCategories,
+    //     pageInfo: {
+    //       count: 2,
+    //       page: undefined,
+    //       pageCount: 1,
+    //       pageSize: 2,
+    //     },
+    //   });
+    // });
   });
 
-  describe('getAllPitchCategory', () => {
-    it('should return array of pitch category', async () => {
-      const results = [
-        {
-          id: 1,
-          name: 'Sân 5',
-          description: 'lorem ipsum',
-          thumbnail: 'avatar',
-        },
-        {
-          id: 2,
-          name: 'Sân 7',
-          description: 'lorem ipsum',
-          thumbnail: 'avatar',
-        },
-        {
-          id: 3,
-          name: 'Sân 11',
-          description: 'lorem ipsum',
-          thumbnail: 'avatar',
-        },
-        {
-          id: 4,
-          name: 'Sân Futsal',
-          description: 'lorem ipsum',
-          thumbnail: 'avatar',
-        },
-      ];
+  describe('findById', () => {
+    it('should find a round by ID', async () => {
+      const roundId = 1;
+      const round = { id: roundId };
 
-      pitchCategoryServiceMock.findAll = jest.fn().mockResolvedValue(results);
+      mockPitchCategoryRepository.findOne.mockResolvedValue(round);
 
-      await expect(service.findAll()).resolves.toEqual(results);
+      const result = await service.findById(roundId);
+
+      expect(mockPitchCategoryRepository.findOne).toHaveBeenCalledWith({ where: { id: roundId } });
+      expect(result).toEqual(round);
+    });
+
+    it('should return null when no round found with the given ID', async () => {
+      const roundId = 1;
+
+      mockPitchCategoryRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findById(roundId);
+
+      expect(mockPitchCategoryRepository.findOne).toHaveBeenCalledWith({ where: { id: roundId } });
+      expect(result).toBeNull();
     });
   });
 });

@@ -110,8 +110,24 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.service.(t|j)s"
     ],
+    "coveragePathIgnorePatterns": [
+      "node_modules",
+      "test-config",
+      "interfaces",
+      "enum",
+      "type",
+      ".dto.ts",
+      ".controller.ts",
+      ".entity.ts",
+      "jestGlobalMocks.ts",
+      ".module.ts",
+      ".decorator.ts",
+      "<rootDir>/src/app/main.ts",
+      ".mock.ts"
+    ],
+    "collectCoverage": true,
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "type": "module",

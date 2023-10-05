@@ -1,111 +1,178 @@
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { PageInfoData } from 'src/common/dtos/base.dto';
+import { Pitch } from 'src/pitch/entities/pitch.entity';
+import { Rating } from 'src/rating/entities/rating.entity';
+import { RatingService } from 'src/rating/rating.service';
+import { SearchService } from 'src/search/search.service';
+import { UserService } from 'src/user/users.service';
+import { ILike, Repository } from 'typeorm';
+import { VenueQuery } from './dtos/query-venue.dto';
+import { Venue } from './entities/venue.entity';
+import { VenueStatusEnum } from './enums/venue.enum';
 import { VenueService } from './venue.service';
 
-const mockVenue = () => {
-  return {
-    id: 1,
-    name: 'san bong lu doan',
-    address: '28/2 duong so 3',
-    openAt: '08:00',
-    closeAt: '23:00',
-    district: 'Quan 2',
-    province: 'Ho Chi Minh',
-  };
-};
-
-const mockVenues = () => {
-  return [
-    {
-      id: 1,
-      name: 'san bong lu doan',
-      address: '28/2 duong so 3',
-      openAt: '08:00',
-      closeAt: '23:00',
-      district: 'Quan 2',
-      province: 'Ho Chi Minh',
-    },
-    {
-      id: 2,
-      name: 'san bong hai quan',
-      address: '28/2 duong so 4',
-      openAt: '08:00',
-      closeAt: '23:00',
-      district: 'Quan 2',
-      province: 'Ho Chi Minh',
-    },
-  ];
-};
-
-const venueServiceMock: Partial<VenueService> = {
-  findOne: jest.fn().mockResolvedValue(mockVenue()),
-  findAll: jest.fn().mockResolvedValue(mockVenues()),
-};
-
 describe('VenueService', () => {
-  let service: VenueService;
+  let venueService: VenueService;
+  let venueRepository: Repository<Venue>;
+
+  const mockIndex = jest.fn();
+  const mockSearch = jest.fn();
+
+  const mockVenueRepository = {
+    findAndCount: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    createQueryBuilder: jest.fn(),
+    getCount: jest.fn(),
+  };
+
+  const mockRatingRepository = {
+    findAndCount: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    createQueryBuilder: jest.fn(),
+    getCount: jest.fn(),
+  };
+
+  const mockPitchRepository = {
+    findAndCount: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+    createQueryBuilder: jest.fn(),
+    getCount: jest.fn(),
+  };
+
+  const mockRatingService = {};
+
+  const mockUserService = {};
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [VenueService, { provide: VenueService, useValue: venueServiceMock }],
+      providers: [
+        VenueService,
+        SearchService,
+        UserService,
+        {
+          provide: getRepositoryToken(Venue),
+          useValue: mockVenueRepository,
+        },
+        {
+          provide: getRepositoryToken(Rating),
+          useValue: mockRatingRepository,
+        },
+        {
+          provide: getRepositoryToken(Pitch),
+          useValue: mockPitchRepository,
+        },
+
+        {
+          provide: RatingService,
+          useValue: mockRatingService,
+        },
+        {
+          provide: UserService,
+          useValue: mockUserService,
+        },
+        {
+          provide: ElasticsearchService,
+          useValue: {
+            index: mockIndex,
+            search: mockSearch,
+          },
+        },
+      ],
     }).compile();
 
-    service = module.get<VenueService>(VenueService);
+    venueService = module.get<VenueService>(VenueService);
+    venueRepository = module.get<Repository<Venue>>(getRepositoryToken(Venue));
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(venueService).toBeDefined();
   });
 
-  describe('getRating', () => {
-    it('should return rating', async () => {
-      const result = {
-        id: 1,
-        name: 'san bong lu doan',
-        address: '28/2 duong so 3',
-        openAt: '08:00',
-        closeAt: '23:00',
-        district: 'Quan 2',
-        province: 'Ho Chi Minh',
-      };
+  describe('findAllVenues Method', () => {
+    it('should return venues based on query parameters', async () => {
+      const query = {
+        status: VenueStatusEnum.Active,
+        keyword: 'venue',
+        page: 1,
+        limit: 0,
+      } as VenueQuery;
 
-      venueServiceMock.findOne = jest.fn().mockResolvedValue(result);
-
-      await expect(
-        service.findOne({
-          where: {
-            id: 1,
-          },
-        }),
-      ).resolves.toEqual(result);
-    });
-  });
-
-  describe('getAllPitch', () => {
-    it('should return array of pitch', async () => {
-      const results = [
+      const mockVenues = [
         {
           id: 1,
           name: 'san bong lu doan',
-          address: '28/2 duong so 3',
-          openAt: '08:00',
-          closeAt: '23:00',
-          district: 'Quan 2',
-          province: 'Ho Chi Minh',
         },
-        {
-          id: 2,
-          name: 'san bong hai quan',
-          address: '28/2 duong so 4',
-          openAt: '08:00',
-          closeAt: '23:00',
-          district: 'Quan 2',
-          province: 'Ho Chi Minh',
+        { id: 2, name: 'san bong trang bom' },
+      ] as Venue[];
+      const pageInfo: PageInfoData = {
+        page: 1,
+        count: 2,
+        pageCount: 1,
+        pageSize: 2,
+      };
+      const expectedResult = {
+        data: mockVenues,
+        pageInfo,
+      };
+
+      mockVenueRepository.findAndCount.mockResolvedValue([mockVenues, 2]);
+
+      const result = await venueService.findAllVenues(query);
+
+      expect(result).toEqual(expectedResult);
+
+      expect(mockVenueRepository.findAndCount).toHaveBeenCalledWith({
+        relations: {
+          pitches: { pitchCategory: true },
+          user: true,
         },
-      ];
+        skip: 0,
+        take: 0,
+        order: {},
+        where: [
+          {
+            status: query.status,
+            name: ILike(`%${query.keyword}%`),
+          },
+          {
+            status: query.status,
+            user: {
+              username: ILike(`%${query.keyword}%`),
+            },
+          },
+        ],
+      });
+    });
+  });
 
-      venueServiceMock.findAll = jest.fn().mockResolvedValue(results);
+  describe('findBySlug', () => {
+    it('should return a venue by id with specified relations and order', async () => {
+      const slug = 'san-bong-lu-doan';
+      const mockVenue = { id: 1, name: 'san bong lu doan', slug } as Venue;
+      mockVenueRepository.findOne.mockResolvedValue(mockVenue);
 
-      await expect(service.findAll()).resolves.toEqual(results);
+      const result = await venueService.findBySlug(slug);
+
+      expect(result).toEqual(mockVenue);
+      expect(venueRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          slug,
+          status: VenueStatusEnum.Active,
+        },
+        relations: {
+          pitches: {
+            pitchCategory: true,
+          },
+        },
+      });
     });
   });
 });

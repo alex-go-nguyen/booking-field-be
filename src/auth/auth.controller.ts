@@ -26,12 +26,10 @@ export class AuthController {
   })
   @ResponseMessage('Login successfully')
   @Post('login')
-  async signIn(@Body() signInDto: SignInPayload) {
+  signIn(@Body() signInDto: SignInPayload) {
     const { username, password } = signInDto;
 
-    const data = await this.authService.signIn(username, password);
-
-    return { data };
+    return this.authService.signIn(username, password);
   }
 
   @ApiOkResponse({
@@ -40,24 +38,14 @@ export class AuthController {
   })
   @ResponseMessage('Register successfully')
   @Post('register')
-  async register(@Body() registerDto: CreateUserDto) {
-    const data = await this.authService.signUp(registerDto);
-
-    return { data };
+  register(@Body() registerDto: CreateUserDto) {
+    return this.authService.signUp(registerDto);
   }
 
   @Post('email/reset-password')
   @HttpCode(HttpStatus.OK)
-  async setNewPassword(@Body() { newPassword, resetToken }: ResetPasswordDto) {
-    const forgottenPassword = await this.forgottenPasswordService.getForgottenPasswordModel(resetToken);
-
-    const data = await this.userService.setPassword(forgottenPassword.email, newPassword);
-
-    if (data) {
-      await this.forgottenPasswordService.remove(forgottenPassword);
-    }
-
-    return { data };
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @ApiOkResponse({
@@ -66,9 +54,7 @@ export class AuthController {
   })
   @ResponseMessage('Update password successfully')
   @Post('forgot-password/:email')
-  async sendEmailForgotPassword(@Param('email') email: string) {
-    const data = await this.authService.sendEmailForgotPassword(email);
-
-    return { data };
+  sendEmailForgotPassword(@Param('email') email: string) {
+    return this.authService.sendEmailForgotPassword(email);
   }
 }

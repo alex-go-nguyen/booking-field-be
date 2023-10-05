@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
@@ -6,11 +6,8 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BaseQuery } from 'src/common/dtos/query.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { dateToTimeFloat } from 'src/common/utils';
 import { PitchService } from 'src/pitch/pitch.service';
 import { CurrentUser } from 'src/user/user.decorator';
-import { Raw } from 'typeorm';
-import { BookingGateway } from './booking.gateway';
 import { BookingService } from './booking.service';
 import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
 import { BookingQuery } from './dtos/booking-query.dto';
@@ -20,135 +17,55 @@ import { UpdateBookingDto } from './dtos/update-booking.dto';
 @ApiTags('Booking')
 @Controller('bookings')
 export class BookingController {
-  constructor(
-    private readonly bookingService: BookingService,
-    private readonly pitchService: PitchService,
-    @Inject(BookingGateway) private readonly bookingGateway: BookingGateway,
-  ) {}
+  constructor(private readonly bookingService: BookingService, private readonly pitchService: PitchService) {}
 
   @ResponseMessage('Get bookings successfully')
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: BookingQuery) {
-    const { pitchId, venueId, date } = query;
-
-    return this.bookingService.findAndCount(query, {
-      where: {
-        ...(venueId && {
-          pitch: {
-            venue: {
-              id: venueId,
-            },
-          },
-        }),
-        ...(pitchId && {
-          pitch: {
-            id: pitchId,
-          },
-        }),
-        ...(date && {
-          startTime: Raw((alias) => `DATE(${alias}) = DATE(:date)`, { date }),
-        }),
-      },
-      relations: {
-        pitch: {
-          pitchCategory: true,
-        },
-        user: true,
-      },
-    });
+    return this.bookingService.findAllBooking(query);
   }
 
   @ResponseMessage('Get analyst successfully')
   @Get('analyst')
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @UseGuards(RoleGuard)
-  async analystIncome(@Query() query: BookingAnalystQuery) {
-    const data = await this.bookingService.analystIncome(query);
-
-    return { data };
+  analystIncome(@Query() query: BookingAnalystQuery) {
+    return this.bookingService.analystIncome(query);
   }
 
   @ResponseMessage('Get analyst by category successfully')
   @Get('analyst/category')
   @Roles(RoleEnum.Owner, RoleEnum.Admin)
   @UseGuards(RoleGuard)
-  async analystCategory(@Query() query: BookingAnalystQuery) {
-    const data = await this.bookingService.analystCategory(query);
-
-    return { data };
+  analystCategory(@Query() query: BookingAnalystQuery) {
+    return this.bookingService.analystCategory(query);
   }
 
   @ResponseMessage('Get user bookings successfully')
   @Get('user')
   @UseGuards(JwtAuthGuard)
   getUserBookings(@CurrentUser('id') id: number, @Query() query: BaseQuery) {
-    return this.bookingService.findAndCount(query, {
-      where: {
-        user: {
-          id,
-        },
-      },
-      relations: {
-        pitch: {
-          pitchCategory: true,
-          venue: true,
-        },
-        rating: true,
-      },
-    });
+    return this.bookingService.getUserBookings(id, query);
   }
 
   @ResponseMessage('Get booking successfully')
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const data = await this.bookingService.findOne({
-      where: {
-        id,
-      },
-      relations: {
-        user: true,
-        pitch: {
-          pitchCategory: true,
-          venue: true,
-        },
-        rating: true,
-      },
-    });
-
-    return { data };
+  findOne(@Param('id') id: number) {
+    return this.bookingService.findOneBooking(id);
   }
 
   @ResponseMessage('Create booking successfully')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createBookingDto: CreateBookingDto, @CurrentUser('id') userId: number) {
-    const { pitch: pitchId, startTime, endTime } = createBookingDto;
-
-    const pitch = await this.pitchService.findOne({
-      where: {
-        id: pitchId,
-      },
-    });
-
-    const start = dateToTimeFloat(new Date(startTime));
-    const end = dateToTimeFloat(new Date(endTime)) === 0 ? 24 : dateToTimeFloat(new Date(endTime));
-
-    const totalPrice = pitch.price * (end - start);
-
-    const payload = { ...createBookingDto, user: userId, totalPrice };
-
-    const data = await this.bookingService.create(payload);
-
-    return { data };
+  create(@Body() createBookingDto: CreateBookingDto, @CurrentUser('id') userId: number) {
+    return this.bookingService.createBooking(createBookingDto, userId);
   }
 
   @ResponseMessage('Update booking successfully')
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateBookingDto: UpdateBookingDto) {
-    const data = await this.bookingService.update(id, updateBookingDto);
-
-    return { data };
+  update(@Param('id') id: number, @Body() updateBookingDto: UpdateBookingDto) {
+    return this.bookingService.update(id, updateBookingDto);
   }
 
   @UseGuards(RoleGuard)
