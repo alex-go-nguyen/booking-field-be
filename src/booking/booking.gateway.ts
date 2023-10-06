@@ -18,7 +18,7 @@ import { Booking } from './entities/booking.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_CLIENT_URL],
     ...(process.env.NODE_ENV !== 'development' && {
       origin: process.env.CLIENT_URL,
       credentials: true,
