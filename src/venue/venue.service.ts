@@ -7,10 +7,10 @@ import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { Rating } from 'src/rating/entities/rating.entity';
 import { SearchService } from 'src/search/search.service';
 import { UserService } from 'src/user/users.service';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
-import { SearchListVenueQuery } from './dtos/search-list-venue.dto';
+import { SearchVenuesQuery } from './dtos/search-list-venue.dto';
 import { UpdateVenueDto } from './dtos/update-venue.dto';
 import { Venue } from './entities/venue.entity';
 import { VenueStatusEnum } from './enums/venue.enum';
@@ -29,55 +29,74 @@ export class VenueService extends BaseService<Venue, unknown> {
   }
 
   async findAllVenues(query: VenueQuery) {
-    const { userId, status, keyword } = query;
+    const { userId, status, keyword, sorts, page, limit } = query;
 
-    return this.findAndCount(query, {
-      relations: {
-        pitches: { pitchCategory: true },
-        user: true,
+    const take = limit || 0;
+    const skip = (page - 1) * take;
+
+    const qb = this.venueRepository
+      .createQueryBuilder('v')
+      .leftJoinAndSelect('v.pitches', 'pitches')
+      .leftJoinAndSelect('pitches.pitchCategory', 'pitchCategory')
+      .leftJoinAndSelect('v.user', 'user')
+      .where('v.status = :status', { status: status || VenueStatusEnum.Active });
+
+    if (userId) {
+      qb.andWhere('user.id = :userId', { userId });
+    }
+
+    if (keyword) {
+      qb.andWhere('v.name ILIKE :keyword', { keyword });
+    }
+
+    if (sorts) {
+      sorts?.map((sort) => {
+        const { field, order } = sort;
+        qb.addOrderBy(`v.${field}`, order);
+      });
+    }
+
+    qb.take(take).skip(skip);
+
+    const [data, count] = await qb.getManyAndCount();
+
+    const pageCount = take === 0 ? 1 : Math.ceil(count / take);
+    const pageSize = take === 0 ? count : take;
+
+    return {
+      data,
+      pageInfo: {
+        page,
+        pageSize,
+        pageCount,
+        count,
       },
-      where: [
-        {
-          ...(status ? { status } : { status: VenueStatusEnum.Active }),
-          ...(userId && {
-            user: {
-              id: userId,
-            },
-          }),
-          ...(keyword && {
-            name: ILike(`%${keyword}%`),
-          }),
-        },
-        {
-          ...(status ? { status } : { status: VenueStatusEnum.Active }),
-          ...(userId && {
-            user: {
-              id: userId,
-            },
-          }),
-          ...(keyword && {
-            user: {
-              username: ILike(`%${keyword}%`),
-            },
-          }),
-        },
-      ],
-    });
+    };
   }
 
-  async searchVenues(query: SearchListVenueQuery) {
-    const { limit, page, sorts, maxPrice, minPrice, pitchCategory: pitchCategory, location } = query;
+  async searchVenues(query: SearchVenuesQuery) {
+    const {
+      limit,
+      page,
+      sorts,
+      maxPrice,
+      minPrice,
+      pitchCategory: pitchCategory,
+      location,
+      currentLat,
+      currentLng,
+      maxDistance,
+      isProminant,
+    } = query;
 
-    const ids = await this.searchService.search<VenueSearchBody>('venues', location, [
-      'name',
-      'description',
-      'district',
-      'province',
-    ]);
-
-    if (ids.length === 0) {
-      return { data: null };
-    }
+    const ids = location
+      ? await this.searchService.search<VenueSearchBody>('venues', location, [
+          'name',
+          'description',
+          'district',
+          'province',
+        ])
+      : [];
 
     const take = limit || 0;
     const skip = (page - 1) * take;
@@ -85,19 +104,24 @@ export class VenueService extends BaseService<Venue, unknown> {
     const subQb = this.venueRepository
       .createQueryBuilder('v')
       .select('v.id', 'id')
-      .addSelect('p.price', 'price')
+      .addSelect('MIN(p.price)', 'price')
       .leftJoin(Pitch, 'p', 'v.id = p.venueId')
       .leftJoin(Booking, 'b', 'p.id = b.pitchId')
       .leftJoin(Rating, 'r', 'r.bookingId = b.id')
-      .where('p.price > :minPrice')
-      .andWhere('p.price < :maxPrice')
-      .andWhere('p.pitchCategoryId = :pitchCategoryId')
-      .andWhere('v.id IN (:...ids)')
-      .andWhere('v.status = :status')
-      .groupBy('v.id')
-      .addGroupBy('p.price')
-      .addGroupBy('p.pitchCategoryId')
-      .getQuery();
+      .where('v.status = :status')
+      .groupBy('v.id');
+
+    minPrice && subQb.andWhere('p.price > :minPrice');
+    maxPrice && subQb.andWhere('p.price < :maxPrice');
+    pitchCategory && subQb.andWhere('p.pitchCategoryId = :pitchCategoryId');
+
+    if (location) {
+      if (ids.length === 0) {
+        return null;
+      }
+
+      subQb.andWhere('v.id IN (:...ids)');
+    }
 
     const subQb2 = this.ratingRepository
       .createQueryBuilder('r')
@@ -120,10 +144,43 @@ export class VenueService extends BaseService<Venue, unknown> {
       .select('v.*')
       .addSelect('vp.*')
       .addSelect('pr.*')
-      .leftJoin(`(${subQb})`, 'vp', 'v.id = vp.id')
+
+      .leftJoin(`(${subQb.getQuery()})`, 'vp', 'v.id = vp.id')
       .leftJoin(`(${mainQb2})`, 'pr', 'pr."venueId" = v.id')
       .setParameters({ maxPrice, minPrice, pitchCategoryId: pitchCategory, ids, status: VenueStatusEnum.Active })
       .where('vp.id notnull');
+
+    if (currentLat && currentLng) {
+      mainQb
+        .addSelect(
+          `( 6371 * acos( cos( radians(${currentLat}) ) * cos( radians( CAST(v.location->>'lat' AS double precision)) ) * cos( radians( CAST(v.location->>'lng' AS double precision)) - radians(${currentLng}) ) + sin( radians(${currentLat}) ) * sin( radians( CAST(v.location->>'lat' AS double precision) ) ) ) )`,
+          'distance',
+        )
+        .andWhere(
+          `( 6371 * acos( cos( radians(${currentLat}) ) * cos( radians( CAST(v.location->>'lat' AS double precision)) ) * cos( radians( CAST(v.location->>'lng' AS double precision)) - radians(${currentLng}) ) + sin( radians(${currentLat}) ) * sin( radians( CAST(v.location->>'lat' AS double precision) ) ) ) ) < :maxDistance`,
+          { maxDistance },
+        )
+        .addOrderBy('distance', 'ASC');
+    }
+
+    if (isProminant) {
+      mainQb
+        .leftJoinAndSelect(
+          (subQb) => {
+            return subQb
+              .select('COUNT(b.id)', 'totalBooking')
+              .addSelect('v.id', 'id')
+              .from(Venue, 'v')
+              .leftJoin(Pitch, 'p', 'p."venueId" = v.id')
+              .leftJoin(Booking, 'b', 'b."pitchId" = p.id')
+              .groupBy('p."venueId"')
+              .addGroupBy('v.id');
+          },
+          'rs',
+          'rs.id = v.id',
+        )
+        .orderBy('rs."totalBooking"', 'DESC');
+    }
 
     if (sorts) {
       sorts?.map((sort) => {
@@ -131,7 +188,8 @@ export class VenueService extends BaseService<Venue, unknown> {
         mainQb.addOrderBy(`vp.${field}`, order);
       });
     }
-    mainQb.take(take).skip(skip);
+
+    mainQb.limit(take).offset(skip);
 
     const dataQb = mainQb.getRawMany();
     const countQb = mainQb.getCount();

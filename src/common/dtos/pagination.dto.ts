@@ -8,11 +8,11 @@ export class Pagination {
   @IsInt()
   @Min(1)
   @Type(() => Number)
-  page: number;
+  page = 1;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  limit: number;
+  limit = 0;
 }
