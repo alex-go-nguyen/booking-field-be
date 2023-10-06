@@ -117,7 +117,7 @@ export class VenueService extends BaseService<Venue, unknown> {
 
     if (location) {
       if (ids.length === 0) {
-        return null;
+        return [];
       }
 
       subQb.andWhere('v.id IN (:...ids)');

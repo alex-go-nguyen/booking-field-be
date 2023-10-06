@@ -7,7 +7,7 @@ import { VenueStatusEnum } from './enums/venue.enum';
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_CLIENT_URL],
     ...(process.env.NODE_ENV !== 'development' && { origin: '*', credentials: true, allowedHeaders: 'authorization' }),
   },
 })
