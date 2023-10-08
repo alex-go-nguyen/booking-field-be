@@ -4,6 +4,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { AppGateway } from './app.gateway';
 import { AuthModule } from './auth/auth.module';
 import { BookingModule } from './booking/booking.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
@@ -17,6 +18,7 @@ import { PitchCategoryModule } from './pitch-category/pitch-category.module';
 import { RatingModule } from './rating/rating.module';
 import { RoundModule } from './round/round.module';
 import { SearchModule } from './search/search.module';
+import { SocketModule } from './socket/socket.module';
 import { StripeModule } from './stripe/stripe.module';
 import { StripeService } from './stripe/stripe.service';
 import { TeamModule } from './team/team.module';
@@ -87,6 +89,7 @@ import { VenueModule } from './venue/venue.module';
     MatchModule,
     TeamModule,
     RoundModule,
+    SocketModule,
   ],
   providers: [
     {
@@ -94,6 +97,7 @@ import { VenueModule } from './venue/venue.module';
       useClass: TransformInterceptor,
     },
     StripeService,
+    AppGateway,
   ],
 })
 export class AppModule {}
