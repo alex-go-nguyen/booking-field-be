@@ -6,13 +6,12 @@ import { NotificationModule } from 'src/notification/notification.module';
 import { PitchModule } from 'src/pitch/pitch.module';
 import { UserModule } from 'src/user/users.module';
 import { BookingController } from './booking.controller';
-import { BookingGateway } from './booking.gateway';
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Booking]), JwtModule, UserModule, PitchModule, AuthModule, NotificationModule],
-  providers: [BookingService, BookingGateway],
+  providers: [BookingService],
   controllers: [BookingController],
 })
 export class BookingModule {}
