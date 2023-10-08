@@ -5,9 +5,8 @@ import { ResponseMessage } from 'src/common/decorators/response-message.decorato
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { BasePaginationResponse, BaseResponse } from 'src/common/dtos/base.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { SearchService } from 'src/search/search.service';
 import { CreatePitchDto } from './dtos/create-pitch.dto';
-import { PitchQuery } from './dtos/pitch-query.dto';
+import { GetPitchesQuery } from './dtos/pitch-query.dto';
 import { UpdatePitchDto } from './dtos/update-pitch.dto';
 import { Pitch } from './entities/pitch.entity';
 import { PitchService } from './pitch.service';
@@ -15,7 +14,7 @@ import { PitchService } from './pitch.service';
 @ApiTags('Pitch')
 @Controller('pitches')
 export class PitchController {
-  constructor(private readonly pitchService: PitchService, private readonly searchService: SearchService) {}
+  constructor(private readonly pitchService: PitchService) {}
 
   @ApiOkResponse({
     description: 'Get all pitches successfully!',
@@ -23,7 +22,7 @@ export class PitchController {
   })
   @ResponseMessage('Get all pitches successfully')
   @Get()
-  findAll(@Query() query: PitchQuery) {
+  findAll(@Query() query: GetPitchesQuery) {
     return this.pitchService.findAllPitches(query);
   }
 

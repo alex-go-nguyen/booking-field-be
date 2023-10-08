@@ -10,7 +10,7 @@ import { PitchController } from './pitch.controller';
 import { PitchService } from './pitch.service';
 
 @Module({
-  imports: [VenueModule, TypeOrmModule.forFeature([Pitch]), JwtModule, UserModule, PitchCategoryModule, SearchModule],
+  imports: [VenueModule, TypeOrmModule.forFeature([Pitch]), JwtModule, UserModule, PitchCategoryModule],
   providers: [PitchService],
   controllers: [PitchController],
   exports: [PitchService],

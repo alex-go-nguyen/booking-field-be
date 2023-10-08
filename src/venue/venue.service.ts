@@ -7,7 +7,7 @@ import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { Rating } from 'src/rating/entities/rating.entity';
 import { SearchService } from 'src/search/search.service';
 import { UserService } from 'src/user/users.service';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateVenueDto } from './dtos/create-venue.dto';
 import { VenueQuery } from './dtos/query-venue.dto';
 import { SearchVenuesQuery } from './dtos/search-list-venue.dto';
@@ -28,50 +28,28 @@ export class VenueService extends BaseService<Venue, unknown> {
     super(venueRepository);
   }
 
-  async findAllVenues(query: VenueQuery) {
-    const { userId, status, keyword, sorts, page, limit } = query;
+  findAllVenues(query: VenueQuery) {
+    const { userId, status, keyword } = query;
 
-    const take = limit || 0;
-    const skip = (page - 1) * take;
-
-    const qb = this.venueRepository
-      .createQueryBuilder('v')
-      .leftJoinAndSelect('v.pitches', 'pitches')
-      .leftJoinAndSelect('pitches.pitchCategory', 'pitchCategory')
-      .leftJoinAndSelect('v.user', 'user')
-      .where('v.status = :status', { status: status || VenueStatusEnum.Active });
-
-    if (userId) {
-      qb.andWhere('user.id = :userId', { userId });
-    }
-
-    if (keyword) {
-      qb.andWhere('v.name ILIKE :keyword', { keyword });
-    }
-
-    if (sorts) {
-      sorts?.map((sort) => {
-        const { field, order } = sort;
-        qb.addOrderBy(`v.${field}`, order);
-      });
-    }
-
-    qb.take(take).skip(skip);
-
-    const [data, count] = await qb.getManyAndCount();
-
-    const pageCount = take === 0 ? 1 : Math.ceil(count / take);
-    const pageSize = take === 0 ? count : take;
-
-    return {
-      data,
-      pageInfo: {
-        page,
-        pageSize,
-        pageCount,
-        count,
+    return this.findAndCount(query, {
+      where: {
+        ...(userId && {
+          user: {
+            id: userId,
+          },
+        }),
+        ...(keyword && {
+          name: ILike(`%${keyword}%`),
+        }),
+        status: status || VenueStatusEnum.Active,
       },
-    };
+      relations: {
+        pitches: {
+          pitchCategory: true,
+        },
+        user: true,
+      },
+    });
   }
 
   async searchVenues(query: SearchVenuesQuery) {

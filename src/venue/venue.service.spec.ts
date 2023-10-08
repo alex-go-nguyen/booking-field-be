@@ -103,6 +103,7 @@ describe('VenueService', () => {
         keyword: 'venue',
         page: 1,
         limit: 0,
+        userId: 1,
       } as VenueQuery;
 
       const mockVenues = [
@@ -137,18 +138,13 @@ describe('VenueService', () => {
         skip: 0,
         take: 0,
         order: {},
-        where: [
-          {
-            status: query.status,
-            name: ILike(`%${query.keyword}%`),
+        where: {
+          status: query.status,
+          name: ILike(`%${query.keyword}%`),
+          user: {
+            id: query.userId,
           },
-          {
-            status: query.status,
-            user: {
-              username: ILike(`%${query.keyword}%`),
-            },
-          },
-        ],
+        },
       });
     });
   });
@@ -165,6 +161,38 @@ describe('VenueService', () => {
       expect(venueRepository.findOne).toHaveBeenCalledWith({
         where: {
           slug,
+          status: VenueStatusEnum.Active,
+        },
+        relations: {
+          pitches: {
+            pitchCategory: true,
+          },
+        },
+      });
+    });
+  });
+
+  describe('findByCurrentUser', () => {
+    it('should return a venue by current user', async () => {
+      const userId = 1;
+      const mockVenue = {
+        id: 1,
+        name: 'san bong lu doan',
+        user: {
+          id: 1,
+        },
+      } as Venue;
+
+      mockVenueRepository.findOne.mockResolvedValue(mockVenue);
+
+      const result = await venueService.getVenueByCurrentUser(userId);
+
+      expect(result).toEqual(mockVenue);
+      expect(venueRepository.findOne).toHaveBeenCalledWith({
+        where: {
+          user: {
+            id: userId,
+          },
           status: VenueStatusEnum.Active,
         },
         relations: {
