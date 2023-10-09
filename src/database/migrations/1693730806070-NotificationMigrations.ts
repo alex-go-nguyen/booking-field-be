@@ -15,6 +15,11 @@ export class NotificationMigrations1693730806070 implements MigrationInterface {
             name: 'message',
             type: 'varchar',
           },
+          {
+            name: 'isSeen',
+            type: 'boolean',
+            default: false,
+          },
           ...BASE_COLUMNS,
         ],
       }),
