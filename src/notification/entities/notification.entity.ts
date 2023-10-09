@@ -11,6 +11,9 @@ export class Notification extends Base {
   @Column()
   message: string;
 
+  @Column({ default: false })
+  isSeen: boolean;
+
   @ManyToOne(() => User, (user) => user.notifications)
   user: User;
 }

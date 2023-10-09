@@ -35,7 +35,7 @@ describe('NotificationService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAllNotification', () => {
+  describe('findByCurrentUser', () => {
     it('should find and count notifications with given query', async () => {
       const query: GetNotificationsQuery = {
         page: 1,
@@ -48,7 +48,7 @@ describe('NotificationService', () => {
 
       mockNotificationRepository.findAndCount.mockResolvedValue([notifications, totalCount]);
 
-      const result = await service.findAllNotifications(query, userId);
+      const result = await service.findByCurrentUser(query, userId);
 
       expect(mockNotificationRepository.findAndCount).toHaveBeenCalledWith({
         take: 0,
@@ -80,7 +80,7 @@ describe('NotificationService', () => {
 
       mockNotificationRepository.findAndCount.mockResolvedValue([notifcations, totalCount]);
 
-      const result = await service.findAllNotifications(query, userId);
+      const result = await service.findByCurrentUser(query, userId);
 
       expect(mockNotificationRepository.findAndCount).toHaveBeenCalledWith({
         take: 0,
