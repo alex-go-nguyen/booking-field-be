@@ -16,6 +16,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { BaseResponse } from 'src/common/dtos/base.dto';
 import { CurrentUser } from 'src/user/user.decorator';
+import { UpdateResult } from 'typeorm';
 import { CreateNotificationDto } from './dtos/create-notification.dto';
 import { GetNotificationsQuery } from './dtos/notification-query.dto';
 import { UpdateNotificationDto } from './dtos/update-notification.dto';
@@ -34,8 +35,30 @@ export class NotificationController {
   @ResponseMessage('Get all notifications successfully')
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query() query: GetNotificationsQuery, @CurrentUser('id') userId: number) {
-    return this.notifcationService.findAllNotifications(query, userId);
+  findAll(@Query() query: GetNotificationsQuery) {
+    return this.notifcationService.findAllNotifications(query);
+  }
+
+  @ApiOkResponse({
+    description: 'Get all notifications successfully!',
+    type: [Notification],
+  })
+  @ResponseMessage('Get all notifications successfully')
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  findByCurrentUser(@Query() query: GetNotificationsQuery, @CurrentUser('id') userId: number) {
+    return this.notifcationService.findByCurrentUser(query, userId);
+  }
+
+  @ApiOkResponse({
+    description: 'Get count not seen notifications successfully!',
+    type: 'number',
+  })
+  @ResponseMessage('Get count not seen notifications successfully')
+  @UseGuards(JwtAuthGuard)
+  @Get('/count-not-seen')
+  countNotSeen(@CurrentUser('id') userId: number) {
+    return this.notifcationService.countNotSeen(userId);
   }
 
   @ApiOkResponse({
@@ -58,6 +81,18 @@ export class NotificationController {
   @Post()
   create(@Body() createNotificationDto: CreateNotificationDto) {
     return this.notifcationService.create(createNotificationDto);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Update notification successfully',
+    type: BaseResponse<UpdateResult>,
+  })
+  @ResponseMessage('Update notification successfully')
+  @UseGuards(JwtAuthGuard)
+  @Put('bulk-update-status')
+  bulkUpdateSeenStatus(@CurrentUser('id') userId: number) {
+    return this.notifcationService.bulkUpdateSeenStatus(userId);
   }
 
   @ApiResponse({

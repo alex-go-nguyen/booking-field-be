@@ -11,7 +11,19 @@ export class NotificationService extends BaseService<Notification, unknown> {
     super(notificationRepository);
   }
 
-  findAllNotifications(query: GetNotificationsQuery, userId: number) {
+  findAllNotifications(query: GetNotificationsQuery) {
+    return this.findAndCount(query);
+  }
+
+  findById(id: number) {
+    return this.findOne({
+      where: {
+        id,
+      },
+    });
+  }
+
+  findByCurrentUser(query: GetNotificationsQuery, userId: number) {
     return this.findAndCount(query, {
       where: {
         ...(userId && {
@@ -23,11 +35,23 @@ export class NotificationService extends BaseService<Notification, unknown> {
     });
   }
 
-  findById(id: number) {
-    return this.findOne({
-      where: {
-        id,
-      },
-    });
+  countNotSeen(userId: number) {
+    const qb = this.notificationRepository
+      .createQueryBuilder('n')
+      .select('COUNT(*)', 'countNotSeen')
+      .where('n."userId" = :userId', { userId })
+      .andWhere('n."isSeen" = false');
+
+    return qb.getRawOne();
+  }
+
+  bulkUpdateSeenStatus(userId: number) {
+    const qb = this.notificationRepository
+      .createQueryBuilder('n')
+      .update(Notification)
+      .set({ isSeen: true })
+      .where('userId = :userId', { userId });
+
+    return qb.execute();
   }
 }
