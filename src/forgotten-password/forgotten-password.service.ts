@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/services/base.service';
-import { ForgottenPassowrd } from 'src/user/entities/forgotten-password.entity';
+import { ForgottenPassword } from 'src/user/entities/forgotten-password.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ForgottenPasswordService extends BaseService<ForgottenPassowrd, unknown> {
+export class ForgottenPasswordService extends BaseService<ForgottenPassword, unknown> {
   constructor(
-    @InjectRepository(ForgottenPassowrd) private readonly forgottenPasswordRepository: Repository<ForgottenPassowrd>,
+    @InjectRepository(ForgottenPassword) private readonly forgottenPasswordRepository: Repository<ForgottenPassword>,
   ) {
     super(forgottenPasswordRepository);
   }
@@ -20,7 +20,7 @@ export class ForgottenPasswordService extends BaseService<ForgottenPassowrd, unk
     });
   }
 
-  remove(forgottenPassword: ForgottenPassowrd) {
+  remove(forgottenPassword: ForgottenPassword) {
     return this.forgottenPasswordRepository.remove(forgottenPassword);
   }
 }

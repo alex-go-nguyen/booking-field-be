@@ -1,9 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PageInfoData } from 'src/common/dtos/base.dto';
+import { Pitch } from 'src/pitch/entities/pitch.entity';
 import { PitchService } from 'src/pitch/pitch.service';
+import { PitchCategory } from 'src/pitch-category/entities/pitch-category.entity';
 import { Raw, Repository } from 'typeorm';
 import { BookingService } from './booking.service';
+import { BookingAnalystQuery } from './dtos/booking-analyst-query.dto';
 import { BookingQuery } from './dtos/booking-query.dto';
 import { Booking } from './entities/booking.entity';
 
@@ -109,6 +112,107 @@ describe('BookingService', () => {
           user: true,
         },
       });
+    });
+  });
+  describe('analystIncome', () => {
+    it('should return an array of income data', async () => {
+      const year = 2023;
+      const venueId = 1;
+
+      // Mock the expected result from the query builder
+      const expectedResult = [
+        { day: '01/01/2023', total: 100 },
+        { day: '01/02/2023', total: 150 },
+      ];
+
+      // Mock the query builder methods and their results
+      jest.spyOn(mockBookingRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue(expectedResult),
+      });
+
+      const query: BookingAnalystQuery = { year, venueId };
+      const result = await service.analystIncome(query);
+
+      expect(result).toEqual(expectedResult);
+      // Ensure that the query builder methods were called correctly
+      expect(bookingRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(bookingRepository.createQueryBuilder).toHaveBeenCalledWith('b');
+      expect(bookingRepository.createQueryBuilder().select).toHaveBeenCalledWith(
+        "TO_CHAR(DATE_TRUNC('DAY', b.createdAt), 'mm/dd/yyyy')",
+        'day',
+      );
+      expect(bookingRepository.createQueryBuilder().addSelect).toHaveBeenCalledWith('SUM(b.totalPrice)::int', 'total');
+      expect(bookingRepository.createQueryBuilder().leftJoin).toHaveBeenCalledWith(Pitch, 'p', 'b.pitchId = p.id');
+      expect(bookingRepository.createQueryBuilder().where).toHaveBeenCalledWith(
+        "DATE_PART('YEAR', b.createdAt) = :year",
+        { year },
+      );
+      expect(bookingRepository.createQueryBuilder().andWhere).toHaveBeenCalledWith('p."venueId" = :venueId', {
+        venueId,
+      });
+      expect(bookingRepository.createQueryBuilder().groupBy).toHaveBeenCalledWith("DATE_TRUNC('DAY', b.createdAt)");
+      expect(bookingRepository.createQueryBuilder().getRawMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('analystCategory', () => {
+    it('should return an array of category data', async () => {
+      const year = 2023;
+      const venueId = 1;
+
+      // Mock the expected result from the query builder
+      const expectedResult = [
+        { pitchCategoryId: 1, category: 'Category 1', total: 5 },
+        { pitchCategoryId: 2, category: 'Category 2', total: 3 },
+      ];
+
+      // Mock the query builder methods and their results
+      jest.spyOn(mockBookingRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue(expectedResult),
+      });
+
+      const query: BookingAnalystQuery = { year, venueId };
+      const result = await service.analystCategory(query);
+
+      expect(result).toEqual(expectedResult);
+      // Ensure that the query builder methods were called correctly
+      expect(bookingRepository.createQueryBuilder).toHaveBeenCalledTimes(9);
+      expect(bookingRepository.createQueryBuilder).toHaveBeenCalledWith('b');
+      expect(bookingRepository.createQueryBuilder().select).toHaveBeenCalledWith(
+        'p.pitchCategoryId',
+        'pitchCategoryId',
+      );
+      expect(bookingRepository.createQueryBuilder().addSelect).toHaveBeenCalledWith('pc.name', 'category');
+      expect(bookingRepository.createQueryBuilder().addSelect).toHaveBeenCalledWith('COUNT(*)::int', 'total');
+      expect(bookingRepository.createQueryBuilder().leftJoin).toHaveBeenCalledWith(Pitch, 'p', 'b.pitchId = p.id');
+      expect(bookingRepository.createQueryBuilder().leftJoin).toHaveBeenCalledWith(
+        PitchCategory,
+        'pc',
+        'p."pitchCategoryId" = pc.id',
+      );
+      expect(bookingRepository.createQueryBuilder().where).toHaveBeenCalledWith(
+        "DATE_PART('YEAR', b.createdAt) = :year",
+        { year },
+      );
+      expect(bookingRepository.createQueryBuilder().andWhere).toHaveBeenCalledWith('p."venueId" = :venueId', {
+        venueId,
+      });
+      expect(bookingRepository.createQueryBuilder().groupBy).toHaveBeenCalledWith('pc.name');
+      expect(bookingRepository.createQueryBuilder().addGroupBy).toHaveBeenCalledWith('p.pitchCategoryId');
+      expect(bookingRepository.createQueryBuilder().getRawMany).toHaveBeenCalledTimes(1);
     });
   });
 });

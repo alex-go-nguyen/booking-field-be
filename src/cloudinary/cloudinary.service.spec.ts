@@ -1,29 +1,16 @@
+import { UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UploadApiOptions, UploadApiResponse, UploadResponseCallback, UploadStream } from 'cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryService } from './cloudinary.service';
 
-jest.mock('buffer-to-stream');
-jest.mock('cloudinary');
-
 describe('CloudinaryService', () => {
-  let cloudinaryService: CloudinaryService;
+  let service: CloudinaryService;
   let configService: ConfigService;
 
-  const mockFile = {
-    fieldname: 'image',
-    originalname: 'test.jpg',
-    encoding: '7bit',
-    mimetype: 'image/jpeg',
-    buffer: Buffer.from([1, 2, 3]), // Mocked file content
-    size: 12345,
-    destination: '',
-    filename: '',
-    path: '',
-  } as Express.Multer.File;
-
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const cloudinaryModule: TestingModule = await Test.createTestingModule({
       providers: [
         CloudinaryService,
         {
@@ -31,92 +18,116 @@ describe('CloudinaryService', () => {
           useValue: {
             get: jest.fn((key) => {
               if (key === 'NODE_ENV') {
-                return 'test'; // Adjust this value according to your environment
+                return 'test';
               }
+              // Add any other environment-specific configuration values as needed.
             }),
           },
         },
       ],
     }).compile();
 
-    cloudinaryService = module.get<CloudinaryService>(CloudinaryService);
-    configService = module.get<ConfigService>(ConfigService);
+    service = cloudinaryModule.get<CloudinaryService>(CloudinaryService);
+    configService = cloudinaryModule.get<ConfigService>(ConfigService);
   });
 
-  // describe('uploadImage', () => {
-  //   it('should upload an image to Cloudinary', async () => {
-  //     const userId = 1;
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
-  //     const uploadApiResponse = {
-  //       public_id: 'image_id',
-  //       secure_url: 'https://example.com/image.jpg',
-  //       created_at: '2023-01-01T12:00:00Z',
-  //     };
+  describe('uploadImage', () => {
+    it('should upload an image', async () => {
+      const mockUploadResponse = {
+        public_id: 'test-public-id',
+        secure_url: 'https://example.com/test-image.jpg',
+      } as UploadApiResponse;
 
-  //     cloudinary.uploader.upload_stream = jest.fn((options, callback) => {
-  //       callback(null, uploadApiResponse);
-  //     });
+      const mockFile = {
+        buffer: Buffer.from('fake-image-data'),
+      } as Express.Multer.File;
+      const callbackfn: any = (options, callback) => {
+        callback(null, mockUploadResponse) as UploadResponseCallback;
+      };
 
-  //     const result = await cloudinaryService.uploadImage({ userId, file: mockFile });
+      jest.spyOn(cloudinary.uploader, 'upload_stream').mockImplementation(callbackfn);
 
-  //     expect(cloudinary.uploader.upload_stream).toHaveBeenCalledWith(
-  //       {
-  //         folder: 'test/1',
-  //       },
-  //       expect.any(Function),
-  //     );
-  //     expect(result).toEqual(uploadApiResponse);
-  //   });
+      const result = await service.uploadImage({
+        userId: 1,
+        file: mockFile,
+      });
 
-  //   it('should throw an UnprocessableEntityException when Cloudinary upload fails', async () => {
-  //     const userId = 1;
+      expect(result).toEqual(mockUploadResponse);
+      expect(cloudinary.uploader.upload_stream).toHaveBeenCalledWith(
+        {
+          folder: 'test/1',
+        },
+        expect.any(Function),
+      );
+    });
 
-  //     const errorMessage = 'Error uploading image';
+    it('should throw UnprocessableEntityException on upload error', async () => {
+      const mockFile = {
+        buffer: Buffer.from('fake-image-data'),
+      } as Express.Multer.File;
 
-  //     cloudinary.uploader.upload_stream = jest.fn((options, callback) => {
-  //       callback(new Error(errorMessage), null);
-  //     });
+      const callbackfn: any = (options, callback) => {
+        callback(new Error('Upload failed'));
+      };
 
-  //     await expect(cloudinaryService.uploadImage({ userId, file: mockFile })).rejects.toThrowError(
-  //       UnprocessableEntityException,
-  //     );
-  //   });
-  // });
+      jest.spyOn(cloudinary.uploader, 'upload_stream').mockImplementation(callbackfn);
 
-  // describe('uploadImages', () => {
-  //   it('should upload multiple images to Cloudinary', async () => {
-  //     const userId = 1;
+      await expect(async () => {
+        await service.uploadImage({
+          userId: 1,
+          file: mockFile,
+        });
+      }).rejects.toThrow(UnprocessableEntityException);
+    });
+  });
 
-  //     const uploadApiResponse = {
-  //       public_id: 'image_id',
-  //       secure_url: 'https://example.com/image.jpg',
-  //       created_at: '2023-01-01T12:00:00Z',
-  //     };
+  describe('uploadImages', () => {
+    it('should upload multiple images', async () => {
+      const mockFile1 = {
+        buffer: Buffer.from('fake-image-data-1'),
+      } as Express.Multer.File;
 
-  //     cloudinary.uploader.upload_stream = jest.fn((options, callback) => {
-  //       callback(null, uploadApiResponse);
-  //     });
+      const mockFile2 = {
+        buffer: Buffer.from('fake-image-data-2'),
+      } as Express.Multer.File;
 
-  //     const files = [mockFile, mockFile, mockFile]; // Mocked array of files
-  //     const result = await cloudinaryService.uploadImages({ userId, files });
+      const mockUploadResponse1 = {
+        public_id: 'test-public-id-1',
+        secure_url: 'https://example.com/test-image-1.jpg',
+      } as UploadApiResponse;
 
-  //     expect(cloudinary.uploader.upload_stream).toHaveBeenCalledTimes(files.length);
-  //     expect(result).toHaveLength(files.length);
-  //     for (const item of result) {
-  //       expect(item).toEqual(uploadApiResponse);
-  //     }
-  //   });
-  // });
+      const mockUploadResponse2 = {
+        public_id: 'test-public-id-2',
+        secure_url: 'https://example.com/test-image-2.jpg',
+      } as UploadApiResponse;
+
+      jest
+        .spyOn(service, 'uploadImage')
+        .mockResolvedValueOnce(mockUploadResponse1)
+        .mockResolvedValueOnce(mockUploadResponse2);
+
+      const result = await service.uploadImages({
+        userId: 1,
+        files: [mockFile1, mockFile2],
+      });
+
+      expect(result).toEqual([mockUploadResponse1, mockUploadResponse2]);
+    });
+  });
 
   describe('deleteFile', () => {
-    it('should delete a file from Cloudinary', async () => {
-      const fileId = 'image_id';
+    it('should delete a file', async () => {
+      const mockFileId = 'test-public-id';
 
-      cloudinary.uploader.destroy = jest.fn();
+      jest.spyOn(cloudinary.uploader, 'destroy').mockResolvedValue({ result: 'ok' });
 
-      await cloudinaryService.deleteFile(fileId);
+      await service.deleteFile(mockFileId);
 
-      expect(cloudinary.uploader.destroy).toHaveBeenCalledWith(fileId);
+      expect(cloudinary.uploader.destroy).toHaveBeenCalledWith(mockFileId);
     });
   });
 });
