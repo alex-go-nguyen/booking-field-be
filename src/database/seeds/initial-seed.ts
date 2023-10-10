@@ -54,7 +54,7 @@ export default class InitialDatabaseSeed implements Seeder {
 
     await factory(User)().createMany(10, { role: RoleEnum.User });
 
-    const usersWithOwnerRole = await factory(User)().createMany(25, { role: RoleEnum.Owner });
+    const usersWithOwnerRole = await factory(User)().createMany(40, { role: RoleEnum.Owner });
 
     const venues = await factory(Venue)()
       .map(async (venue) => {
@@ -62,7 +62,7 @@ export default class InitialDatabaseSeed implements Seeder {
 
         return venue;
       })
-      .createMany(25);
+      .createMany(40);
 
     await factory(Pitch)()
       .map(async (pitch) => {
