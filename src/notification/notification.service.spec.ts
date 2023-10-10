@@ -14,6 +14,7 @@ describe('NotificationService', () => {
     save: jest.fn(),
     findOne: jest.fn(),
     findAndCount: jest.fn(),
+    createQueryBuilder: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -126,6 +127,58 @@ describe('NotificationService', () => {
 
       expect(mockNotificationRepository.findOne).toHaveBeenCalledWith({ where: { id: notificationId } });
       expect(result).toBeNull();
+    });
+  });
+
+  describe('countNotSeen', () => {
+    it('should return the count of not seen notifications', async () => {
+      const userId = 1;
+      const expectedResult = { countNotSeen: 5 };
+
+      jest.spyOn(mockNotificationRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue(expectedResult),
+      });
+
+      const result = await service.countNotSeen(userId);
+
+      expect(result).toEqual(expectedResult);
+      expect(notificationRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(notificationRepository.createQueryBuilder).toHaveBeenCalledWith('n');
+      expect(notificationRepository.createQueryBuilder().select).toHaveBeenCalledWith('COUNT(*)', 'countNotSeen');
+      expect(notificationRepository.createQueryBuilder().where).toHaveBeenCalledWith('n."userId" = :userId', {
+        userId,
+      });
+      expect(notificationRepository.createQueryBuilder().andWhere).toHaveBeenCalledWith('n."isSeen" = false');
+      expect(notificationRepository.createQueryBuilder().getRawOne).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('bulkUpdateSeenStatus', () => {
+    it('should bulk update seen status for notifications', async () => {
+      const userId = 1;
+      const expectedResult = { affected: 5 }; // Replace with your expected affected count
+
+      jest.spyOn(mockNotificationRepository, 'createQueryBuilder').mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(expectedResult),
+      });
+
+      const result = await service.bulkUpdateSeenStatus(userId);
+
+      expect(result).toEqual(expectedResult);
+      expect(mockNotificationRepository.createQueryBuilder).toHaveBeenCalledTimes(6);
+      expect(mockNotificationRepository.createQueryBuilder).toHaveBeenCalledWith('n');
+      expect(mockNotificationRepository.createQueryBuilder().update).toHaveBeenCalledWith(Notification);
+      expect(mockNotificationRepository.createQueryBuilder().set).toHaveBeenCalledWith({ isSeen: true });
+      expect(mockNotificationRepository.createQueryBuilder().where).toHaveBeenCalledWith('userId = :userId', {
+        userId,
+      });
+      expect(mockNotificationRepository.createQueryBuilder().execute).toHaveBeenCalledTimes(1);
     });
   });
 });

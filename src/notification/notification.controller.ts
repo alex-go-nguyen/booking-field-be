@@ -45,7 +45,7 @@ export class NotificationController {
   })
   @ResponseMessage('Get all notifications successfully')
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('/me')
   findByCurrentUser(@Query() query: GetNotificationsQuery, @CurrentUser('id') userId: number) {
     return this.notifcationService.findByCurrentUser(query, userId);
   }
