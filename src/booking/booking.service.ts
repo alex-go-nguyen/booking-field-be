@@ -125,7 +125,7 @@ export class BookingService extends BaseService<Booking, unknown> {
     const start = dateToTimeFloat(new Date(startTime));
     const end = dateToTimeFloat(new Date(endTime)) === 0 ? 24 : dateToTimeFloat(new Date(endTime));
 
-    const totalPrice = pitch.price * (end - start);
+    const totalPrice = Math.abs(pitch.price * (end - start));
 
     const payload = { ...createBookingDto, user: userId, totalPrice };
 
